@@ -3,12 +3,22 @@ import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
-import 'assessment_details_screen.dart';
+import 'subject_quizzes_screen.dart';
 
 class SubjectsScreen extends StatefulWidget {
   final bool embedded;
   final bool jumpToAssessments;
-  const SubjectsScreen({super.key, this.embedded = false, this.jumpToAssessments = false});
+  final String? classRoomId;
+  final String? classRoomName;
+  final void Function(Subject)? onSubjectTap;
+  const SubjectsScreen({
+    super.key,
+    this.embedded = false,
+    this.jumpToAssessments = false,
+    this.classRoomId,
+    this.classRoomName,
+    this.onSubjectTap,
+  });
 
   @override
   State<SubjectsScreen> createState() => _SubjectsScreenState();
@@ -22,7 +32,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   @override
   void initState() {
     super.initState();
-    _future = AppRepository.instance.fetchSubjects();
+    _future = AppRepository.instance.fetchSubjects(classRoomId: widget.classRoomId);
   }
 
   @override
@@ -43,7 +53,11 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               SkeletonBox(height: 90, radius: 20),
             ],
           );
-          return widget.embedded ? loading : Scaffold(body: SafeArea(child: loading));
+          if (widget.embedded) return loading;
+          return Scaffold(
+            appBar: AppBar(title: Text(widget.classRoomName ?? 'Subjects'), leading: const BackButton()),
+            body: SafeArea(top: false, child: loading),
+          );
         }
         return _buildBody(context, snapshot.data!);
       },
@@ -60,7 +74,8 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text(widget.jumpToAssessments ? 'Assessments' : 'My Subjects', style: Theme.of(context).textTheme.headlineMedium),
+        Text(widget.classRoomName ?? (widget.jumpToAssessments ? 'Assessments' : 'My Subjects'),
+            style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
         Text('Explore subjects and their pre-study assessments', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
@@ -117,7 +132,14 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                   decoration: softCardDecoration(),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(AppRadius.lg),
-                    onTap: () => Navigator.of(context).push(fadeRoute(const AssessmentDetailsScreen())),
+                    onTap: () => widget.onSubjectTap != null
+                        ? widget.onSubjectTap!(s)
+                        : Navigator.of(context).push(fadeRoute(SubjectQuizzesScreen(
+                            subjectId: s.id,
+                            subjectName: s.name,
+                            subjectIcon: s.icon,
+                            subjectColor: s.color,
+                          ))),
                     child: Row(
                       children: [
                         IconBadge(icon: s.icon, color: s.color, size: 50),
@@ -154,6 +176,9 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     );
 
     if (widget.embedded) return body;
-    return Scaffold(body: SafeArea(child: body));
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.classRoomName ?? 'Subjects'), leading: const BackButton()),
+      body: SafeArea(top: false, child: body),
+    );
   }
 }

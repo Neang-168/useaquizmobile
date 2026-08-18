@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Central design system for the Pre-Study IT Knowledge Assessment System.
@@ -137,11 +137,11 @@ class AppTheme {
 /// Reusable glassmorphism-style card decoration.
 BoxDecoration glassCardDecoration({double radius = AppRadius.lg, Color? tint}) {
   return BoxDecoration(
-    color: (tint ?? Colors.white).withOpacity(0.65),
+    color: (tint ?? Colors.white).withValues(alpha: 0.65),
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.2),
+    border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.2),
     boxShadow: [
-      BoxShadow(color: AppColors.primary.withOpacity(0.06), blurRadius: 24, offset: const Offset(0, 12)),
+      BoxShadow(color: AppColors.primary.withValues(alpha: 0.06), blurRadius: 24, offset: const Offset(0, 12)),
     ],
   );
 }
@@ -151,7 +151,7 @@ BoxDecoration softCardDecoration({double radius = AppRadius.lg}) {
     color: Colors.white,
     borderRadius: BorderRadius.circular(radius),
     boxShadow: [
-      BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 8)),
+      BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 8)),
     ],
   );
 }

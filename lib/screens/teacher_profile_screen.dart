@@ -1,28 +1,28 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'login_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class TeacherProfileScreen extends StatefulWidget {
   final bool embedded;
-  const ProfileScreen({super.key, this.embedded = false});
+  const TeacherProfileScreen({super.key, this.embedded = false});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<TeacherProfileScreen> createState() => _TeacherProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
   bool _notificationsOn = true;
   bool _darkMode = false;
   bool _loggingOut = false;
-  late Future<RepoResult<Student>> _future;
+  late Future<RepoResult<Teacher>> _future;
 
   @override
   void initState() {
     super.initState();
-    _future = AppRepository.instance.fetchProfile();
+    _future = AppRepository.instance.fetchTeacherProfile();
   }
 
   Future<void> _savePreferences() async {
@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RepoResult<Student>>(
+    return FutureBuilder<RepoResult<Teacher>>(
       future: _future,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -61,11 +61,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, RepoResult<Student> result) {
-    final student = result.data;
-    final initials = student.name.trim().isEmpty
+  Widget _buildBody(BuildContext context, RepoResult<Teacher> result) {
+    final teacher = result.data;
+    final initials = teacher.name.trim().isEmpty
         ? '?'
-        : student.name.trim().split(RegExp(r'\s+')).map((w) => w[0]).take(2).join().toUpperCase();
+        : teacher.name.trim().split(RegExp(r'\s+')).map((w) => w[0]).take(2).join().toUpperCase();
 
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
@@ -94,9 +94,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(student.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(teacher.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text(student.id, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+              Text(teacher.id, style: const TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),
         ),
@@ -107,11 +107,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: softCardDecoration(),
           child: Column(
             children: [
-              _detailRow(context, Icons.school_outlined, 'Faculty', student.faculty),
+              _detailRow(context, Icons.school_outlined, 'Department', teacher.department),
               const Divider(height: 24),
-              _detailRow(context, Icons.book_outlined, 'Major', student.major),
+              _detailRow(context, Icons.badge_outlined, 'Title', teacher.title),
               const Divider(height: 24),
-              _detailRow(context, Icons.calendar_month_outlined, 'Academic Year', student.academicYear),
+              _detailRow(context, Icons.email_outlined, 'Email', teacher.email),
             ],
           ),
         ),

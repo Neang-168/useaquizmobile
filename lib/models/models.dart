@@ -33,7 +33,7 @@ Color colorFromHex(String? hex) {
   return Color(int.parse('FF$h', radix: 16));
 }
 
-String hexFromColor(Color c) => '#${c.value.toRadixString(16).substring(2).toUpperCase()}';
+String hexFromColor(Color c) => '#${c.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
 
 enum PerformanceLevel { excellent, good, average, beginner }
 
@@ -62,6 +62,7 @@ class Subject {
   final Color color;
   final int totalAssessments;
   final int completed;
+  final String classRoomId;
 
   const Subject({
     this.id = '',
@@ -72,6 +73,7 @@ class Subject {
     required this.color,
     required this.totalAssessments,
     required this.completed,
+    this.classRoomId = '',
   });
 
   factory Subject.fromJson(Map<String, dynamic> j) => Subject(
@@ -83,6 +85,34 @@ class Subject {
         color: colorFromHex(j['color']),
         totalAssessments: j['totalAssessments'] ?? 0,
         completed: j['completed'] ?? 0,
+        classRoomId: '${j['classRoomId'] ?? ''}',
+      );
+}
+
+class ClassRoom {
+  final String id;
+  final String name;
+  final String code;
+  final IconData icon;
+  final Color color;
+  final int totalSubjects;
+
+  const ClassRoom({
+    this.id = '',
+    required this.name,
+    required this.code,
+    required this.icon,
+    required this.color,
+    required this.totalSubjects,
+  });
+
+  factory ClassRoom.fromJson(Map<String, dynamic> j) => ClassRoom(
+        id: '${j['id']}',
+        name: j['name'] ?? '',
+        code: j['code'] ?? '',
+        icon: iconFromKey(j['icon']),
+        color: colorFromHex(j['color']),
+        totalSubjects: j['totalSubjects'] ?? 0,
       );
 }
 
@@ -114,7 +144,9 @@ class Question {
 
 class Assessment {
   final String id;
+  final String subjectId;
   final String subject;
+  final String title;
   final String lecturer;
   final int totalQuestions;
   final int timeLimitMinutes;
@@ -127,7 +159,9 @@ class Assessment {
 
   const Assessment({
     this.id = '',
+    this.subjectId = '',
     required this.subject,
+    this.title = '',
     required this.lecturer,
     required this.totalQuestions,
     required this.timeLimitMinutes,
@@ -141,7 +175,9 @@ class Assessment {
 
   factory Assessment.fromJson(Map<String, dynamic> j) => Assessment(
         id: '${j['id']}',
+        subjectId: '${j['subjectId'] ?? ''}',
         subject: j['subject'] ?? '',
+        title: j['title'] ?? '',
         lecturer: j['lecturer'] ?? '',
         totalQuestions: j['totalQuestions'] ?? (j['questions'] as List?)?.length ?? 0,
         timeLimitMinutes: j['timeLimitMinutes'] ?? 15,
@@ -221,6 +257,86 @@ class Student {
         faculty: j['faculty'] ?? '',
         major: j['major'] ?? '',
         academicYear: j['academicYear'] ?? '',
+      );
+}
+
+enum UserRole { student, teacher }
+
+/// Minimal identity returned right after login — just enough for the login
+/// screen to decide which home layout to open. Each role's full profile is
+/// loaded separately by its own profile screen.
+class AuthResult {
+  final UserRole role;
+  final String id;
+  final String name;
+
+  const AuthResult({required this.role, required this.id, required this.name});
+}
+
+class Teacher {
+  final String id;
+  final String name;
+  final String email;
+  final String department;
+  final String title;
+
+  const Teacher({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.department,
+    required this.title,
+  });
+
+  factory Teacher.fromJson(Map<String, dynamic> j) => Teacher(
+        id: '${j['id']}',
+        name: j['name'] ?? '',
+        email: j['email'] ?? '',
+        department: j['department'] ?? '',
+        title: j['title'] ?? '',
+      );
+}
+
+/// One student's result on one quiz, as seen from the teacher's "All Results" view.
+class TeacherResult {
+  final String studentName;
+  final String studentId;
+  final String subjectId;
+  final String subjectName;
+  final String className;
+  final String date;
+  final int score;
+  final String status;
+  final Color color;
+  final String assessmentId;
+  final List<int?> answers;
+
+  const TeacherResult({
+    required this.studentName,
+    required this.studentId,
+    this.subjectId = '',
+    required this.subjectName,
+    required this.className,
+    required this.date,
+    required this.score,
+    required this.status,
+    required this.color,
+    this.assessmentId = '',
+    this.answers = const [],
+  });
+
+  factory TeacherResult.fromJson(Map<String, dynamic> j) => TeacherResult(
+        studentName: j['studentName'] ?? '',
+        studentId: j['studentId'] ?? '',
+        subjectId: '${j['subjectId'] ?? ''}',
+        subjectName: j['subjectName'] ?? '',
+        className: j['className'] ?? '',
+        date: j['date'] ?? '',
+        score: j['score'] ?? 0,
+        status: j['status'] ?? '',
+        color: colorFromHex(j['color']),
+        assessmentId: '${j['assessmentId'] ?? ''}',
+        answers: (j['answers'] as List? ?? const []).map((a) => a == null ? null : a as int).toList(),
       );
 }
 

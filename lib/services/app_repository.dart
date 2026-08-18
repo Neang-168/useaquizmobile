@@ -22,38 +22,64 @@ class AppRepository {
 
   // ---------------- Auth ----------------
 
-  Future<Student> login({required String identifier, required String password, required bool remember}) async {
-    final json = await _api.post('/auth/login', auth: false, body: {
-      'identifier': identifier,
-      'password': password,
-    });
-    final token = json['token'] as String;
-    await Session.saveToken(token, remember: remember);
-    return Student.fromJson(Map<String, dynamic>.from(json['student']));
-  }
-
-  Future<Student> loginWithGoogle({required bool remember}) async {
-    final json = await _api.post('/auth/google', auth: false);
-    final token = json['token'] as String;
-    await Session.saveToken(token, remember: remember);
-    return Student.fromJson(Map<String, dynamic>.from(json['student']));
+  Future<RepoResult<AuthResult>> login({required String identifier, required String password, required bool remember}) async {
+    try {
+      final json = await _api.post('/auth/login', auth: false, body: {
+        'identifier': identifier,
+        'password': password,
+      });
+      final token = json['token'] as String;
+      await Session.saveToken(token, remember: remember);
+      final role = UserRole.values.firstWhere((r) => r.name == json['role'], orElse: () => UserRole.student);
+      final account = Map<String, dynamic>.from(json['student'] ?? json['teacher'] ?? const {});
+      return RepoResult(AuthResult(role: role, id: '${account['id'] ?? ''}', name: account['name'] ?? ''));
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      // No backend reachable — proceed straight into the demo experience,
+      // picking a role from the entered id so both demo accounts are reachable:
+      // a "TCH..." id signs in as the demo teacher, anything else as the demo student.
+      await Session.saveToken('demo-token', remember: remember);
+      final isTeacher = identifier.trim().toUpperCase().startsWith('TCH');
+      return RepoResult(
+        isTeacher
+            ? const AuthResult(role: UserRole.teacher, id: MockData.teacherId, name: MockData.teacherName)
+            : const AuthResult(role: UserRole.student, id: MockData.studentId, name: MockData.studentName),
+        isDemo: true,
+      );
+    }
   }
 
   Future<void> logout() async => Session.clear();
 
+  // ---------------- Class Rooms ----------------
+
+  Future<RepoResult<List<ClassRoom>>> fetchClassRooms() async {
+    try {
+      final json = await _api.get('/classrooms');
+      final list = (json as List).map((c) => ClassRoom.fromJson(Map<String, dynamic>.from(c))).toList();
+      return RepoResult(list);
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      return RepoResult(MockData.classRooms, isDemo: true);
+    }
+  }
+
   // ---------------- Subjects ----------------
 
-  Future<RepoResult<List<Subject>>> fetchSubjects({String? query, String? semester}) async {
+  Future<RepoResult<List<Subject>>> fetchSubjects({String? query, String? semester, String? classRoomId}) async {
     try {
       final json = await _api.get('/subjects', query: {
         if (query != null && query.isNotEmpty) 'query': query,
         if (semester != null && semester != 'All') 'semester': semester,
+        if (classRoomId != null) 'classRoomId': classRoomId,
       });
       final list = (json as List).map((s) => Subject.fromJson(Map<String, dynamic>.from(s))).toList();
       return RepoResult(list);
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult(MockData.subjects, isDemo: true);
+      var list = MockData.subjects;
+      if (classRoomId != null) list = list.where((s) => s.classRoomId == classRoomId).toList();
+      return RepoResult(list, isDemo: true);
     }
   }
 
@@ -65,7 +91,20 @@ class AppRepository {
       return RepoResult(Assessment.fromJson(Map<String, dynamic>.from(json)));
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult(MockData.androidAssessment, isDemo: true);
+      final a = MockData.assessments.firstWhere((a) => a.id == id, orElse: () => MockData.assessments.first);
+      return RepoResult(a, isDemo: true);
+    }
+  }
+
+  Future<RepoResult<List<Assessment>>> fetchAssessmentsBySubject(String subjectId) async {
+    try {
+      final json = await _api.get('/subjects/$subjectId/assessments');
+      final list = (json as List).map((a) => Assessment.fromJson(Map<String, dynamic>.from(a))).toList();
+      return RepoResult(list);
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      final list = MockData.assessments.where((a) => a.subjectId == subjectId).toList();
+      return RepoResult(list, isDemo: true);
     }
   }
 
@@ -76,7 +115,7 @@ class AppRepository {
       return RepoResult(list);
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult([MockData.androidAssessment], isDemo: true);
+      return RepoResult(MockData.assessments.take(2).toList(), isDemo: true);
     }
   }
 
@@ -95,12 +134,14 @@ class AppRepository {
       return RepoResult(SubmissionResult.fromJson(Map<String, dynamic>.from(json)));
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult(_scoreLocally(answers), isDemo: true);
+      return RepoResult(_scoreLocally(assessmentId, answers), isDemo: true);
     }
   }
 
-  SubmissionResult _scoreLocally(List<int?> answers) {
-    final questions = MockData.androidAssessment.questions;
+  SubmissionResult _scoreLocally(String assessmentId, List<int?> answers) {
+    final assessment =
+        MockData.assessments.firstWhere((a) => a.id == assessmentId, orElse: () => MockData.assessments.first);
+    final questions = assessment.questions;
     var correct = 0;
     for (var i = 0; i < questions.length && i < answers.length; i++) {
       if (answers[i] == questions[i].correctIndex) correct++;
@@ -197,6 +238,43 @@ class AppRepository {
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
       // demo mode: nothing to persist
+    }
+  }
+
+  // ---------------- Teacher ----------------
+
+  Future<RepoResult<Teacher>> fetchTeacherProfile() async {
+    try {
+      final json = await _api.get('/teacher/profile');
+      return RepoResult(Teacher.fromJson(Map<String, dynamic>.from(json)));
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      return RepoResult(
+        const Teacher(
+          id: MockData.teacherId,
+          name: MockData.teacherName,
+          email: MockData.teacherEmail,
+          department: MockData.teacherDepartment,
+          title: MockData.teacherTitle,
+        ),
+        isDemo: true,
+      );
+    }
+  }
+
+  Future<RepoResult<List<TeacherResult>>> fetchAllResults({String? subjectId, String? query}) async {
+    try {
+      final json = await _api.get('/teacher/results', query: {
+        if (subjectId != null) 'subjectId': subjectId,
+        if (query != null && query.isNotEmpty) 'query': query,
+      });
+      final list = (json as List).map((r) => TeacherResult.fromJson(Map<String, dynamic>.from(r))).toList();
+      return RepoResult(list);
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      var list = MockData.teacherResults;
+      if (subjectId != null) list = list.where((r) => r.subjectId == subjectId).toList();
+      return RepoResult(list, isDemo: true);
     }
   }
 }

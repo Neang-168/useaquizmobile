@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
@@ -91,7 +91,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: (unanswered > 0 ? AppColors.warning : AppColors.secondary).withOpacity(0.12),
+                  color: (unanswered > 0 ? AppColors.warning : AppColors.secondary).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(unanswered > 0 ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
@@ -172,7 +172,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
-                      color: (lowTime ? AppColors.danger : AppColors.primary).withOpacity(0.1),
+                      color: (lowTime ? AppColors.danger : AppColors.primary).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
                     child: Row(
@@ -240,7 +240,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: selected ? AppColors.primary.withOpacity(0.08) : Colors.white,
+                            color: selected ? AppColors.primary.withValues(alpha: 0.08) : Colors.white,
                             borderRadius: BorderRadius.circular(AppRadius.md),
                             border: Border.all(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.6 : 1),
                           ),
@@ -281,7 +281,7 @@ class _QuizScreenState extends State<QuizScreen> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16, offset: const Offset(0, -4))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, -4))],
               ),
               child: Row(
                 children: [

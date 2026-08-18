@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/app_repository.dart';
@@ -67,7 +67,7 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(AppRadius.sm)),
+                                  color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(AppRadius.sm)),
                               child: Icon(a.icon, color: Colors.white, size: 28),
                             ),
                             const SizedBox(width: 14),
@@ -134,7 +134,7 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            color: AppColors.primary.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
                         child: Row(
                           children: [
                             const Icon(Icons.info_outline_rounded, color: AppColors.primary),

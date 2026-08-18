@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/app_repository.dart';
@@ -71,12 +71,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: n.unread ? AppColors.primary.withOpacity(0.05) : Colors.white,
+                          color: n.unread ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: n.unread ? Border.all(color: AppColors.primary.withOpacity(0.2)) : null,
+                          border: n.unread ? Border.all(color: AppColors.primary.withValues(alpha: 0.2)) : null,
                           boxShadow: n.unread
                               ? null
-                              : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 14, offset: const Offset(0, 6))],
+                              : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 6))],
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,

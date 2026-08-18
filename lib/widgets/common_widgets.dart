@@ -1,13 +1,17 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Bottom navigation used across Home, Subjects, Assessments, History, Profile.
+typedef BottomNavItem = ({IconData icon, String label});
+
+/// Bottom navigation used across Home, Subjects, Assessments, History, Profile
+/// (and, with a custom [items] list, the teacher layout).
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
-  const AppBottomNav({super.key, required this.currentIndex, required this.onTap});
+  final List<BottomNavItem> items;
+  const AppBottomNav({super.key, required this.currentIndex, required this.onTap, this.items = _defaultItems});
 
-  static const _items = [
+  static const _defaultItems = [
     (icon: Icons.home_rounded, label: 'Home'),
     (icon: Icons.menu_book_rounded, label: 'Subjects'),
     (icon: Icons.fact_check_rounded, label: 'Assessments'),
@@ -20,16 +24,16 @@ class AppBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, -4))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, -4))],
       ),
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: SafeArea(
         top: false,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(_items.length, (i) {
+          children: List.generate(items.length, (i) {
             final active = i == currentIndex;
-            final item = _items[i];
+            final item = items[i];
             return GestureDetector(
               onTap: () => onTap(i),
               behavior: HitTestBehavior.opaque,
@@ -37,7 +41,7 @@ class AppBottomNav extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+                  color: active ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Column(
@@ -94,7 +98,7 @@ class StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(AppRadius.pill)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.pill)),
       child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 11.5)),
     );
   }
@@ -111,7 +115,7 @@ class IconBadge extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(AppRadius.sm)),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.sm)),
       child: Icon(icon, color: color, size: size * 0.5),
     );
   }
@@ -149,7 +153,7 @@ class EmptyState extends StatelessWidget {
           Container(
             width: 84,
             height: 84,
-            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.08), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), shape: BoxShape.circle),
             child: Icon(icon, size: 38, color: AppColors.primary),
           ),
           const SizedBox(height: 16),
@@ -174,14 +178,14 @@ class DemoModeBanner extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.1), borderRadius: BorderRadius.circular(AppRadius.sm)),
+      decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.sm)),
       child: Row(
         children: [
           const Icon(Icons.cloud_off_rounded, size: 16, color: AppColors.warning),
           const SizedBox(width: 8),
           Expanded(
             child: Text('Showing demo data — the API server isn\'t reachable right now.',
-                style: TextStyle(fontSize: 11.5, color: const Color(0xFF92400E).withOpacity(0.9), fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: 11.5, color: const Color(0xFF92400E).withValues(alpha: 0.9), fontWeight: FontWeight.w500)),
           ),
         ],
       ),

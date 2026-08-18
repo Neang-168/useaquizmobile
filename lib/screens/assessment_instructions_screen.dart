@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
@@ -32,7 +32,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 28),
                     width: double.infinity,
-                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
+                    decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
                     child: Column(
                       children: [
                         const Icon(Icons.menu_book_rounded, color: AppColors.primary, size: 40),
@@ -63,7 +63,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: AppColors.warning.withOpacity(0.1), borderRadius: BorderRadius.circular(AppRadius.lg)),
+                    decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.lg)),
                     child: Row(
                       children: [
                         const Icon(Icons.warning_amber_rounded, color: AppColors.warning),

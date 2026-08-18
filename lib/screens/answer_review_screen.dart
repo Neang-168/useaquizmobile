@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
@@ -6,7 +6,8 @@ import '../widgets/common_widgets.dart';
 class AnswerReviewScreen extends StatefulWidget {
   final List<int?> answers;
   final List<Question> questions;
-  const AnswerReviewScreen({super.key, required this.answers, required this.questions});
+  final String title;
+  const AnswerReviewScreen({super.key, required this.answers, required this.questions, this.title = 'Answer Review'});
 
   @override
   State<AnswerReviewScreen> createState() => _AnswerReviewScreenState();
@@ -22,7 +23,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
     final isCorrect = studentAnswer == q.correctIndex;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Answer Review'), leading: const BackButton()),
+      appBar: AppBar(title: Text(widget.title), leading: const BackButton()),
       body: SafeArea(
         top: false,
         child: Column(
@@ -60,12 +61,12 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
 
                     if (isCorrectOption) {
                       borderColor = AppColors.secondary;
-                      bg = AppColors.secondary.withOpacity(0.08);
+                      bg = AppColors.secondary.withValues(alpha: 0.08);
                       trailingIcon = Icons.check_circle_rounded;
                       iconColor = AppColors.secondary;
                     } else if (isStudentPick && !isCorrectOption) {
                       borderColor = AppColors.danger;
-                      bg = AppColors.danger.withOpacity(0.08);
+                      bg = AppColors.danger.withValues(alpha: 0.08);
                       trailingIcon = Icons.cancel_rounded;
                       iconColor = AppColors.danger;
                     }
@@ -93,7 +94,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
+                    decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -110,7 +111,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 16, offset: const Offset(0, -4))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, -4))],
               ),
               child: Row(
                 children: [

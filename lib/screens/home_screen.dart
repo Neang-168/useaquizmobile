@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
@@ -6,6 +6,7 @@ import '../data/mock_data.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'subjects_screen.dart';
+import 'classrooms_screen.dart';
 import 'assessment_details_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _pages = const [
     _HomeDashboardBody(),
-    SubjectsScreen(embedded: true),
+    ClassRoomsScreen(embedded: true),
     _AssessmentsPlaceholder(),
     HistoryScreen(embedded: true),
     ProfileScreen(embedded: true),
@@ -150,7 +151,7 @@ class _DashboardBody extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
                 ]),
                 child: Stack(
                   alignment: Alignment.center,
@@ -208,7 +209,7 @@ class _DashboardBody extends StatelessWidget {
                 radius: 38,
                 lineWidth: 8,
                 percent: progress.clamp(0, 1),
-                backgroundColor: Colors.white.withOpacity(0.25),
+                backgroundColor: Colors.white.withValues(alpha: 0.25),
                 progressColor: Colors.white,
                 circularStrokeCap: CircularStrokeCap.round,
                 center: Text('${(progress * 100).round()}%',

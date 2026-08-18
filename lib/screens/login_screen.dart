@@ -1,10 +1,11 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../models/models.dart';
 import '../widgets/common_widgets.dart';
 import '../services/app_repository.dart';
 import '../services/api_client.dart';
 import 'home_screen.dart';
+import 'teacher_home_screen.dart';
 
 // Brand palette for this screen, matched to the university's web login page
 // (indigo/violet accent, soft lavender surfaces). Scoped locally rather than
@@ -31,44 +32,27 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   final _idController = TextEditingController();
   final _passwordController = TextEditingController();
-  late final TapGestureRecognizer _signUpRecognizer = TapGestureRecognizer()
-    ..onTap = () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Contact your faculty office to create an account.')),
-      );
-    };
 
   @override
   void dispose() {
     _idController.dispose();
     _passwordController.dispose();
-    _signUpRecognizer.dispose();
     super.dispose();
   }
 
-  Future<void> _login({bool google = false}) async {
+  Future<void> _login() async {
     setState(() => _loading = true);
     try {
-      if (google) {
-        await AppRepository.instance.loginWithGoogle(remember: _rememberMe);
-      } else {
-        await AppRepository.instance.login(
-          identifier: _idController.text.trim(),
-          password: _passwordController.text,
-          remember: _rememberMe,
-        );
-      }
+      final result = await AppRepository.instance.login(
+        identifier: _idController.text.trim(),
+        password: _passwordController.text,
+        remember: _rememberMe,
+      );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(fadeRoute(const HomeScreen()));
+      final home = result.data.role == UserRole.teacher ? const TeacherHomeScreen() : const HomeScreen();
+      Navigator.of(context).pushReplacement(fadeRoute(home));
     } on ApiException catch (e) {
       if (!mounted) return;
-      if (e.isConnectivity) {
-        // No backend reachable — proceed straight into the demo experience
-        // rather than blocking the user, since the rest of the app already
-        // falls back to mock data screen by screen.
-        Navigator.of(context).pushReplacement(fadeRoute(const HomeScreen()));
-        return;
-      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message), backgroundColor: AppColors.danger),
       );
@@ -125,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(22),
                   boxShadow: [
-                    BoxShadow(color: _Brand.indigo.withOpacity(0.18), blurRadius: 24, offset: const Offset(0, 12)),
+                    BoxShadow(color: _Brand.indigo.withValues(alpha: 0.18), blurRadius: 24, offset: const Offset(0, 12)),
                   ],
                 ),
                 child: Image.asset('assets/usealogo.jpg', fit: BoxFit.contain),
@@ -148,9 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Container(height: 6, width: 22, decoration: BoxDecoration(color: _Brand.indigo, borderRadius: BorderRadius.circular(3))),
                   const SizedBox(width: 6),
-                  Container(height: 6, width: 6, decoration: BoxDecoration(color: _Brand.indigo.withOpacity(0.25), shape: BoxShape.circle)),
+                  Container(height: 6, width: 6, decoration: BoxDecoration(color: _Brand.indigo.withValues(alpha: 0.25), shape: BoxShape.circle)),
                   const SizedBox(width: 6),
-                  Container(height: 6, width: 6, decoration: BoxDecoration(color: _Brand.indigo.withOpacity(0.25), shape: BoxShape.circle)),
+                  Container(height: 6, width: 6, decoration: BoxDecoration(color: _Brand.indigo.withValues(alpha: 0.25), shape: BoxShape.circle)),
                 ],
               ),
               const SizedBox(height: 28),
@@ -163,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 24, offset: const Offset(0, 10)),
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 24, offset: const Offset(0, 10)),
                   ],
                 ),
                 child: Column(
@@ -172,12 +156,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text('Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _Brand.textDark)),
                     const SizedBox(height: 22),
 
-                    _fieldLabel('Username or Email'),
+                    _fieldLabel('Student ID'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _idController,
                       decoration: _fieldDecoration(
-                        hint: 'ITU2023-0142 or name@usea.edu.kh',
+                        hint: 'ITU2023-0142',
                         prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.textMuted, size: 20),
                       ),
                     ),
@@ -246,48 +230,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             : const Text('Login'),
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    Row(
-                      children: [
-                        const Expanded(child: Divider(color: AppColors.border)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('or continue with', style: Theme.of(context).textTheme.bodyMedium),
-                        ),
-                        const Expanded(child: Divider(color: AppColors.border)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.border, width: 1.4),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                        onPressed: _loading ? null : () => _login(google: true),
-                        icon: const Icon(Icons.g_mobiledata_rounded, color: AppColors.danger, size: 26),
-                        label: const Text('Sign in with Google'),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
+                    const SizedBox(height: 14),
                     Center(
-                      child: RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          children: [
-                            const TextSpan(text: "Don't have an account? "),
-                            TextSpan(
-                              text: 'Sign up',
-                              style: const TextStyle(color: _Brand.indigo, fontWeight: FontWeight.w700),
-                              recognizer: _signUpRecognizer,
-                            ),
-                          ],
-                        ),
+                      child: Text(
+                        'Demo: any Student ID signs in as a student · an ID starting with TCH signs in as a teacher.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11.5),
                       ),
                     ),
                   ],
