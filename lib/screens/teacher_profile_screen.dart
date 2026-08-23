@@ -175,7 +175,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
           IconBadge(icon: icon, color: AppColors.primary, size: 38),
           const SizedBox(width: 12),
           Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-          Switch(value: value, activeThumbColor: AppColors.primary, onChanged: onChanged),
+          Switch(value: value, activeColor: AppColors.primary, onChanged: onChanged),
         ],
       ),
     );
