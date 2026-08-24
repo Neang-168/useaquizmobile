@@ -7,16 +7,15 @@ import '../services/api_client.dart';
 import 'home_screen.dart';
 import 'teacher_home_screen.dart';
 
-// Brand palette for this screen, matched to the university's web login page
-// (indigo/violet accent, soft lavender surfaces). Scoped locally rather than
-// added to AppColors since only this screen has been rebranded so far —
-// promote these into app_theme.dart if the rest of the app follows suit.
+// Brand palette for this screen, matched to the university's navy web
+// portal. Scoped locally rather than added to AppColors since login has its
+// own soft-surface look; the navy value itself matches AppColors.primary.
 class _Brand {
   _Brand._();
-  static const indigo = Color(0xFF6366F1);
-  static const pageBg = Color(0xFFEEF1FB);
-  static const fieldFill = Color(0xFFF1F2FB);
-  static const textDark = Color(0xFF1E1B3A);
+  static const indigo = AppColors.primary;
+  static const pageBg = Color(0xFFEEF1F7);
+  static const fieldFill = Color(0xFFF1F3F8);
+  static const textDark = Color(0xFF0B1B33);
 }
 
 class LoginScreen extends StatefulWidget {

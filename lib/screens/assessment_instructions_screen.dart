@@ -12,7 +12,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = assessment;
     final rules = [
-      (icon: Icons.timer_outlined, text: 'You have ${a.timeLimitMinutes} minutes to complete ${a.totalQuestions} questions.'),
+      (icon: Icons.timer_outlined, text: 'You have ${a.duration} minutes to complete ${a.totalQuestions} questions.'),
       (icon: Icons.pause_circle_outline_rounded, text: 'The timer cannot be paused once the assessment starts.'),
       (icon: Icons.flag_outlined, text: 'You may flag questions and revisit them before submitting.'),
       (icon: Icons.check_circle_outline_rounded, text: 'A passing score is not required — this is a diagnostic quiz.'),

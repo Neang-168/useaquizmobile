@@ -96,7 +96,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
               const SizedBox(height: 12),
               Text(teacher.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text(teacher.id, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+              Text(teacher.username, style: const TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),
         ),
@@ -107,11 +107,9 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
           decoration: softCardDecoration(),
           child: Column(
             children: [
-              _detailRow(context, Icons.school_outlined, 'Department', teacher.department),
-              const Divider(height: 24),
-              _detailRow(context, Icons.badge_outlined, 'Title', teacher.title),
-              const Divider(height: 24),
               _detailRow(context, Icons.email_outlined, 'Email', teacher.email),
+              const Divider(height: 24),
+              _detailRow(context, Icons.verified_outlined, 'Status', teacher.status.isEmpty ? '—' : teacher.status),
             ],
           ),
         ),

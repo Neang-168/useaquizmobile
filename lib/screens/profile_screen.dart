@@ -96,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 12),
               Text(student.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text(student.id, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+              Text(student.username, style: const TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),
         ),
@@ -107,11 +107,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           decoration: softCardDecoration(),
           child: Column(
             children: [
-              _detailRow(context, Icons.school_outlined, 'Faculty', student.faculty),
+              _detailRow(context, Icons.book_outlined, 'Major', student.major ?? '—'),
               const Divider(height: 24),
-              _detailRow(context, Icons.book_outlined, 'Major', student.major),
+              _detailRow(context, Icons.meeting_room_outlined, 'Class', student.className ?? '—'),
               const Divider(height: 24),
-              _detailRow(context, Icons.calendar_month_outlined, 'Academic Year', student.academicYear),
+              _detailRow(context, Icons.calendar_month_outlined, 'Academic Year', student.academicYear ?? '—'),
             ],
           ),
         ),

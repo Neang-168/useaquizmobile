@@ -21,6 +21,13 @@ class ApiClient {
   ApiClient._();
   static final ApiClient instance = ApiClient._();
 
+  /// Set by `main.dart` to bounce back to the login screen whenever a
+  /// request comes back 401 (expired/invalid token). Kept as a callback
+  /// rather than importing a screen here to keep services/ independent of
+  /// screens/.
+  static void Function()? onUnauthorized;
+  bool _handling401 = false;
+
   Future<Map<String, String>> _headers({bool auth = true}) async {
     final headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
     if (auth) {
@@ -59,6 +66,12 @@ class ApiClient {
     }
 
     if (res.statusCode == 401) {
+      if (!_handling401) {
+        _handling401 = true;
+        await Session.clear();
+        onUnauthorized?.call();
+        _handling401 = false;
+      }
       throw ApiException('Session expired. Please log in again.', statusCode: 401);
     }
     if (res.statusCode < 200 || res.statusCode >= 300) {

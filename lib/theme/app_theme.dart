@@ -2,15 +2,17 @@
 import 'package:google_fonts/google_fonts.dart';
 
 /// Central design system for the Pre-Study IT Knowledge Assessment System.
-/// Material Design 3, blue/emerald palette, 20px rounded corners, Inter type.
+/// Material Design 3, matched to USEA's web portal (navy/gold/teal), 20px
+/// rounded corners, Inter type.
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF2563EB); // Blue
-  static const Color primaryDark = Color(0xFF1D4ED8);
-  static const Color primaryLight = Color(0xFF60A5FA);
-  static const Color secondary = Color(0xFF10B981); // Emerald
-  static const Color secondaryLight = Color(0xFF6EE7B7);
+  static const Color primary = Color(0xFF002060); // USEA navy
+  static const Color primaryDark = Color(0xFF001540);
+  static const Color primaryLight = Color(0xFF3F5C99);
+  static const Color secondary = Color(0xFF63C7DF); // USEA teal accent
+  static const Color secondaryLight = Color(0xFFA5DEEA);
+  static const Color accent = Color(0xFFE4AC40); // USEA gold accent
 
   static const Color background = Color(0xFFF7F9FC);
   static const Color surface = Colors.white;
@@ -21,25 +23,25 @@ class AppColors {
 
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFEF4444);
+  static const Color danger = Color(0xFFD71818);
   static const Color info = Color(0xFF3B82F6);
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [primary, Color(0xFF4F46E5)],
+    colors: [primary, primaryDark],
   );
 
   static const LinearGradient successGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [secondary, Color(0xFF059669)],
+    colors: [success, Color(0xFF059669)],
   );
 
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF2563EB), Color(0xFF7C3AED)],
+    colors: [primary, Color(0xFF0E4C8C)],
   );
 }
 

@@ -16,7 +16,8 @@ class AssessmentResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final level = result.level;
-    final pct = result.scorePercent;
+    final pct = result.percentage.round();
+    final canReview = (result.reviewQuestions?.isNotEmpty ?? false);
 
     return Scaffold(
       body: SafeArea(
@@ -55,45 +56,48 @@ class AssessmentResultScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _statCard(context, Icons.check_circle_rounded, AppColors.secondary, '${result.correct}', 'Correct'),
+                  child: _statCard(context, Icons.stars_rounded, AppColors.primary, '${result.score}/${result.totalPoints}', 'Score'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child:
-                      _statCard(context, Icons.cancel_rounded, AppColors.danger, '${result.incorrect}', 'Incorrect'),
+                  child: _statCard(context, Icons.flag_circle_rounded, AppColors.secondary, '${result.passMark}%', 'Pass Mark'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _statCard(context, Icons.quiz_rounded, AppColors.primary, '${result.totalQuestions}', 'Questions'),
+                  child: _statCard(
+                      context,
+                      result.passed ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                      result.passed ? AppColors.success : AppColors.danger,
+                      result.passed ? 'Passed' : 'Not Passed',
+                      'Status'),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            Text('Lecturer Feedback', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: softCardDecoration(),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const IconBadge(icon: Icons.forum_rounded, color: AppColors.primary, size: 42),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(result.feedback, style: Theme.of(context).textTheme.bodyLarge)),
-                ],
-              ),
-            ),
             const SizedBox(height: 28),
-            OutlinedButton.icon(
-              onPressed: result.reviewQuestions.isEmpty
-                  ? null
-                  : () => Navigator.of(context).push(fadeRoute(AnswerReviewScreen(
-                        answers: result.studentAnswers,
-                        questions: result.reviewQuestions,
-                      ))),
-              icon: const Icon(Icons.rate_review_outlined, size: 19),
-              label: const Text('View Review'),
-            ),
+            if (!canReview)
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(AppRadius.lg)),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text('A per-question answer review isn\'t available yet — only your overall score is returned.',
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    ),
+                  ],
+                ),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(fadeRoute(AnswerReviewScreen(
+                      questions: result.reviewQuestions!,
+                      selections: result.reviewSelections ?? const [],
+                    ))),
+                icon: const Icon(Icons.rate_review_outlined, size: 19),
+                label: const Text('View Review'),
+              ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pushAndRemoveUntil(fadeRoute(const HomeScreen()), (r) => false),

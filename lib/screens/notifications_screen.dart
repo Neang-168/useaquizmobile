@@ -71,10 +71,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: n.unread ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
+                          color: !n.isRead ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: n.unread ? Border.all(color: AppColors.primary.withValues(alpha: 0.2)) : null,
-                          boxShadow: n.unread
+                          border: !n.isRead ? Border.all(color: AppColors.primary.withValues(alpha: 0.2)) : null,
+                          boxShadow: !n.isRead
                               ? null
                               : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 6))],
                         ),
@@ -90,7 +90,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   Row(
                                     children: [
                                       Expanded(child: Text(n.title, style: Theme.of(context).textTheme.titleMedium)),
-                                      if (n.unread)
+                                      if (!n.isRead)
                                         Container(
                                           width: 8,
                                           height: 8,
@@ -100,7 +100,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(n.subtitle, style: Theme.of(context).textTheme.bodyMedium),
+                                  Text(n.message, style: Theme.of(context).textTheme.bodyMedium),
                                   const SizedBox(height: 6),
                                   Text(n.time,
                                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted, fontSize: 11.5)),

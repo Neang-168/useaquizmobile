@@ -24,6 +24,12 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
     _future = AppRepository.instance.fetchClassRooms();
   }
 
+  Future<void> _refresh() async {
+    final next = AppRepository.instance.fetchClassRooms();
+    await next;
+    if (mounted) setState(() => _future = next);
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<RepoResult<List<ClassRoom>>>(
@@ -51,6 +57,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
     final filtered = result.data.where((c) => c.name.toLowerCase().contains(_query.toLowerCase())).toList();
 
     final body = ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
         Text('My Class Rooms', style: Theme.of(context).textTheme.headlineMedium),
@@ -97,7 +104,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
                             children: [
                               Text(c.name, style: Theme.of(context).textTheme.titleMedium),
                               const SizedBox(height: 4),
-                              Text('${c.code} · ${c.totalSubjects} subjects', style: Theme.of(context).textTheme.bodyMedium),
+                              Text('${c.totalSubjects} subject${c.totalSubjects == 1 ? '' : 's'}', style: Theme.of(context).textTheme.bodyMedium),
                             ],
                           ),
                         ),
@@ -110,7 +117,9 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
       ],
     );
 
-    if (widget.embedded) return body;
-    return Scaffold(body: SafeArea(child: body));
+    final refreshableBody = RefreshIndicator(onRefresh: _refresh, color: AppColors.primary, child: body);
+
+    if (widget.embedded) return refreshableBody;
+    return Scaffold(body: SafeArea(child: refreshableBody));
   }
 }
