@@ -48,8 +48,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildBody(BuildContext context, RepoResult<List<HistoryItem>> result) {
     final filtered = result.data.where((h) {
-      final matchesQuery = h.subject.toLowerCase().contains(_query.toLowerCase());
-      final matchesFilter = _filter == 'All' || h.status == _filter;
+      final q = _query.toLowerCase();
+      final matchesQuery = h.subject.toLowerCase().contains(q) || h.quizTitle.toLowerCase().contains(q);
+      final matchesFilter = _filter == 'All' || h.level.label == _filter;
       return matchesQuery && matchesFilter;
     }).toList();
 
@@ -114,12 +115,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(h.subject, style: Theme.of(context).textTheme.titleMedium),
+                            Text(h.quizTitle.isNotEmpty ? h.quizTitle : h.subject, style: Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: 2),
+                            Text(h.subject, style: Theme.of(context).textTheme.bodyMedium),
                             const SizedBox(height: 4),
                             Row(children: [
                               Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
                               const SizedBox(width: 4),
-                              Text(h.date, style: Theme.of(context).textTheme.bodyMedium),
+                              Text(formatDisplayDate(h.submittedAt), style: Theme.of(context).textTheme.bodyMedium),
                             ]),
                           ],
                         ),
@@ -127,9 +130,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('${h.score}%', style: Theme.of(context).textTheme.titleLarge),
+                          Text('${h.percentage.round()}%', style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 4),
-                          StatusPill(label: h.status, color: h.color),
+                          StatusPill(label: h.level.label, color: h.color),
                         ],
                       ),
                     ],

@@ -28,13 +28,26 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
   @override
   void initState() {
     super.initState();
-    _future = AppRepository.instance.fetchAssessmentsBySubject(widget.subjectId);
+    _future = AppRepository.instance.fetchAssessmentsBySubject(
+      widget.subjectId,
+    );
+  }
+
+  Future<void> _refresh() async {
+    final next = AppRepository.instance.fetchAssessmentsBySubject(
+      widget.subjectId,
+    );
+    await next;
+    if (mounted) setState(() => _future = next);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.subjectName), leading: const BackButton()),
+      appBar: AppBar(
+        title: Text(widget.subjectName),
+        leading: const BackButton(),
+      ),
       body: SafeArea(
         top: false,
         child: FutureBuilder<RepoResult<List<Assessment>>>(
@@ -50,53 +63,85 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
             if (!snapshot.hasData) {
               return const Padding(
                 padding: EdgeInsets.all(20),
-                child: Column(children: [
-                  SkeletonBox(height: 90, radius: 20),
-                  SizedBox(height: 12),
-                  SkeletonBox(height: 90, radius: 20),
-                ]),
+                child: Column(
+                  children: [
+                    SkeletonBox(height: 90, radius: 20),
+                    SizedBox(height: 12),
+                    SkeletonBox(height: 90, radius: 20),
+                  ],
+                ),
               );
             }
             final result = snapshot.data!;
             final quizzes = result.data;
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              children: [
-                if (result.isDemo) const DemoModeBanner(),
-                Text('All Quiz', style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 4),
-                Text('Pre-study quizzes for ${widget.subjectName}', style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(height: 18),
-                if (quizzes.isEmpty)
-                  const EmptyState(
-                    icon: Icons.quiz_outlined,
-                    title: 'No quizzes yet',
-                    subtitle: 'This subject has no pre-study quizzes yet.',
-                  )
-                else
-                  ...quizzes.map((a) => Padding(
+            return RefreshIndicator(
+              onRefresh: _refresh,
+              color: AppColors.primary,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                children: [
+                  if (result.isDemo) const DemoModeBanner(),
+                  Text(
+                    'All Quiz',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pre-study quizzes for ${widget.subjectName}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 18),
+                  if (quizzes.isEmpty)
+                    const EmptyState(
+                      icon: Icons.quiz_outlined,
+                      title: 'No quizzes yet',
+                      subtitle: 'This subject has no pre-study quizzes yet.',
+                    )
+                  else
+                    ...quizzes.map(
+                      (a) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: softCardDecoration(),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(AppRadius.lg),
-                            onTap: () =>
-                                Navigator.of(context).push(fadeRoute(AssessmentDetailsScreen(assessmentId: a.id))),
+                            onTap: () => Navigator.of(context).push(
+                              fadeRoute(
+                                AssessmentDetailsScreen(assessmentId: a.id),
+                              ),
+                            ),
                             child: Row(
                               children: [
-                                IconBadge(icon: widget.subjectIcon, color: widget.subjectColor, size: 50),
+                                IconBadge(
+                                  icon: widget.subjectIcon,
+                                  color: widget.subjectColor,
+                                  size: 50,
+                                ),
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(a.title.isNotEmpty ? a.title : a.subject,
-                                          style: Theme.of(context).textTheme.titleMedium),
+                                      Text(
+                                        a.title.isNotEmpty
+                                            ? a.title
+                                            : a.subject,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
                                       const SizedBox(height: 4),
-                                      Text('${a.totalQuestions} questions · ${a.timeLimitMinutes} min · Due ${a.dueDate}',
-                                          style: Theme.of(context).textTheme.bodyMedium),
+                                      Text(
+                                        '${a.totalQuestions} questions · ${a.duration} min'
+                                        '${a.endAt != null ? ' · Due ${formatDisplayDate(a.endAt, withTime: true)}' : ''}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodyMedium,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -105,8 +150,10 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                             ),
                           ),
                         ),
-                      )),
-              ],
+                      ),
+                    ),
+                ],
+              ),
             );
           },
         ),

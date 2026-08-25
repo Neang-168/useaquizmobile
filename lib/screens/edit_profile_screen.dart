@@ -13,13 +13,15 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.student.name);
+  late final _firstNameController = TextEditingController(text: widget.student.firstName);
+  late final _lastNameController = TextEditingController(text: widget.student.lastName);
   late final _emailController = TextEditingController(text: widget.student.email);
   bool _saving = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     super.dispose();
   }
@@ -29,7 +31,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _saving = true);
     try {
       await AppRepository.instance.updateProfile(
-        name: _nameController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
       );
       if (!mounted) return;
@@ -60,15 +63,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Text('Faculty, major, and academic year are set by the university and can\'t be changed here.',
                   style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 20),
-              Text('Full Name', style: Theme.of(context).textTheme.titleMedium),
+              Text('First Name', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               TextFormField(
-                controller: _nameController,
+                controller: _firstNameController,
                 decoration: const InputDecoration(
-                  hintText: 'Your full name',
+                  hintText: 'Your first name',
                   prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'First name is required' : null,
+              ),
+              const SizedBox(height: 18),
+              Text('Last Name', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(
+                  hintText: 'Your last name',
+                  prefixIcon: Icon(Icons.person_outline_rounded),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Last name is required' : null,
               ),
               const SizedBox(height: 18),
               Text('Email', style: Theme.of(context).textTheme.titleMedium),

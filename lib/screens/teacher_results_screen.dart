@@ -48,10 +48,10 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
   }
 
   Future<void> _openAnswerReview(BuildContext context, TeacherResult r) async {
-    final res = await AppRepository.instance.fetchAssessment(r.assessmentId);
+    final res = await AppRepository.instance.fetchAssessment(r.quizId);
     if (!context.mounted) return;
     Navigator.of(context).push(fadeRoute(AnswerReviewScreen(
-      answers: r.answers,
+      selections: r.answers,
       questions: res.data.questions,
       title: '${r.studentName} · ${r.subjectName}',
     )));
@@ -61,7 +61,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
     final filtered = result.data.where((r) {
       final q = _query.toLowerCase();
       final matchesQuery = r.studentName.toLowerCase().contains(q) || r.subjectName.toLowerCase().contains(q);
-      final matchesFilter = _filter == 'All' || r.status == _filter;
+      final matchesFilter = _filter == 'All' || r.level.label == _filter;
       return matchesQuery && matchesFilter;
     }).toList();
 
@@ -123,7 +123,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
                   decoration: softCardDecoration(),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(AppRadius.lg),
-                    onTap: r.assessmentId.isEmpty ? null : () => _openAnswerReview(context, r),
+                    onTap: r.answers.isEmpty ? null : () => _openAnswerReview(context, r),
                     child: Row(
                       children: [
                         IconBadge(icon: Icons.person_rounded, color: r.color, size: 48),
@@ -139,7 +139,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
                               Row(children: [
                                 Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
                                 const SizedBox(width: 4),
-                                Text(r.date, style: Theme.of(context).textTheme.bodyMedium),
+                                Text(formatDisplayDate(r.submittedAt), style: Theme.of(context).textTheme.bodyMedium),
                               ]),
                             ],
                           ),
@@ -147,9 +147,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('${r.score}%', style: Theme.of(context).textTheme.titleLarge),
+                            Text('${r.percentage.round()}%', style: Theme.of(context).textTheme.titleLarge),
                             const SizedBox(height: 4),
-                            StatusPill(label: r.status, color: r.color),
+                            StatusPill(label: r.level.label, color: r.color),
                           ],
                         ),
                       ],

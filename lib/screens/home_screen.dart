@@ -1,8 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
-import '../data/mock_data.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'subjects_screen.dart';
@@ -34,7 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(child: _pages[_navIndex]),
-      bottomNavigationBar: AppBottomNav(currentIndex: _navIndex, onTap: (i) => setState(() => _navIndex = i)),
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: _navIndex,
+        onTap: (i) => setState(() => _navIndex = i),
+      ),
     );
   }
 }
@@ -55,73 +57,108 @@ class _HomeDashboardBody extends StatefulWidget {
 }
 
 class _HomeDashboardBodyState extends State<_HomeDashboardBody> {
-  late Future<_DashboardData> _future;
+  _DashboardData? _data;
 
   @override
   void initState() {
     super.initState();
-    _future = _load();
+    _load();
   }
 
-  Future<_DashboardData> _load() async {
+  Future<void> _load() async {
     final repo = AppRepository.instance;
+    final profile = await repo.fetchProfile();
     final subjects = await repo.fetchSubjects();
     final assessments = await repo.fetchUpcomingAssessments();
     final history = await repo.fetchHistory();
-    return _DashboardData(
+    final data = _DashboardData(
+      studentName: profile.data.name,
       subjects: subjects.data,
       upcoming: assessments.data,
       history: history.data,
-      isDemo: subjects.isDemo || assessments.isDemo || history.isDemo,
+      isDemo:
+          profile.isDemo ||
+          subjects.isDemo ||
+          assessments.isDemo ||
+          history.isDemo,
     );
+    if (mounted) setState(() => _data = data);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_DashboardData>(
-      future: _future,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            children: const [
-              SkeletonBox(height: 48, radius: 24),
-              SizedBox(height: 24),
-              SkeletonBox(height: 120, radius: 20),
-              SizedBox(height: 24),
-              SkeletonBox(height: 90, radius: 20),
-              SizedBox(height: 24),
-              SkeletonBox(height: 132, radius: 20),
-            ],
-          );
-        }
-        return _DashboardBody(data: snapshot.data!, onRefresh: () => setState(() => _future = _load()));
-      },
+    final data = _data;
+    if (data == null) {
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        children: const [
+          SkeletonBox(height: 48, radius: 24),
+          SizedBox(height: 24),
+          SkeletonBox(height: 120, radius: 20),
+          SizedBox(height: 24),
+          SkeletonBox(height: 90, radius: 20),
+          SizedBox(height: 24),
+          SkeletonBox(height: 132, radius: 20),
+        ],
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: AppColors.primary,
+      child: _DashboardBody(data: data),
     );
   }
 }
 
 class _DashboardData {
+  final String studentName;
   final List<Subject> subjects;
   final List<Assessment> upcoming;
   final List<HistoryItem> history;
   final bool isDemo;
-  _DashboardData({required this.subjects, required this.upcoming, required this.history, required this.isDemo});
+  _DashboardData({
+    required this.studentName,
+    required this.subjects,
+    required this.upcoming,
+    required this.history,
+    required this.isDemo,
+  });
+}
+
+String _initials(String name) {
+  final trimmed = name.trim();
+  if (trimmed.isEmpty) return '?';
+  return trimmed
+      .split(RegExp(r'\s+'))
+      .map((w) => w[0])
+      .take(2)
+      .join()
+      .toUpperCase();
 }
 
 class _DashboardBody extends StatelessWidget {
   final _DashboardData data;
-  final VoidCallback onRefresh;
-  const _DashboardBody({required this.data, required this.onRefresh});
+  const _DashboardBody({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final completedTotal = data.subjects.fold<int>(0, (a, s) => a + s.completed);
-    final totalAssessments = data.subjects.fold<int>(0, (a, s) => a + s.totalAssessments);
-    final progress = totalAssessments == 0 ? 0.0 : completedTotal / totalAssessments;
-    final nextAssessment = data.upcoming.isNotEmpty ? data.upcoming.first : null;
+    final completedTotal = data.subjects.fold<int>(
+      0,
+      (a, s) => a + s.completed,
+    );
+    final totalAssessments = data.subjects.fold<int>(
+      0,
+      (a, s) => a + s.totalAssessments,
+    );
+    final progress = totalAssessments == 0
+        ? 0.0
+        : completedTotal / totalAssessments;
+    final nextAssessment = data.upcoming.isNotEmpty
+        ? data.upcoming.first
+        : null;
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
         if (data.isDemo) const DemoModeBanner(),
@@ -131,39 +168,70 @@ class _DashboardBody extends StatelessWidget {
             Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(gradient: AppColors.primaryGradient, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                shape: BoxShape.circle,
+              ),
               child: Center(
-                  child: Text('SR', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white))),
+                child: Text(
+                  _initials(data.studentName),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Welcome back 👋', style: Theme.of(context).textTheme.bodyMedium),
-                  Text(MockData.studentName, style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Welcome back 👋',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  Text(
+                    data.studentName,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ],
               ),
             ),
             GestureDetector(
-              onTap: () => Navigator.of(context).push(fadeRoute(const NotificationsScreen())),
+              onTap: () => Navigator.of(
+                context,
+              ).push(fadeRoute(const NotificationsScreen())),
               child: Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
-                ]),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
+                    Icon(
+                      Icons.notifications_none_rounded,
+                      color: AppColors.textPrimary,
+                    ),
                     Positioned(
                       top: 11,
                       right: 12,
                       child: Container(
                         width: 8,
                         height: 8,
-                        decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                          color: AppColors.danger,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ],
@@ -177,17 +245,29 @@ class _DashboardBody extends StatelessWidget {
         // Progress hero card
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(gradient: AppColors.heroGradient, borderRadius: BorderRadius.circular(AppRadius.lg)),
+          decoration: BoxDecoration(
+            gradient: AppColors.heroGradient,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
           child: Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Your Learning Progress', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    const Text(
+                      'Your Learning Progress',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
                     const SizedBox(height: 6),
-                    Text('$completedTotal of $totalAssessments completed',
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text(
+                      '$completedTotal of $totalAssessments completed',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -198,9 +278,17 @@ class _DashboardBody extends StatelessWidget {
                       ),
                       onPressed: nextAssessment == null
                           ? null
-                          : () => Navigator.of(context)
-                              .push(fadeRoute(AssessmentDetailsScreen(assessmentId: nextAssessment.id))),
-                      child: const Text('Continue', style: TextStyle(fontSize: 13)),
+                          : () => Navigator.of(context).push(
+                              fadeRoute(
+                                AssessmentDetailsScreen(
+                                  assessmentId: nextAssessment.id,
+                                ),
+                              ),
+                            ),
+                      child: const Text(
+                        'Continue',
+                        style: TextStyle(fontSize: 13),
+                      ),
                     ),
                   ],
                 ),
@@ -212,8 +300,14 @@ class _DashboardBody extends StatelessWidget {
                 backgroundColor: Colors.white.withValues(alpha: 0.25),
                 progressColor: Colors.white,
                 circularStrokeCap: CircularStrokeCap.round,
-                center: Text('${(progress * 100).round()}%',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                center: Text(
+                  '${(progress * 100).round()}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
               ),
             ],
           ),
@@ -233,44 +327,65 @@ class _DashboardBody extends StatelessWidget {
             subtitle: 'No upcoming pre-study assessments right now.',
           )
         else
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: softCardDecoration(),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            onTap: () => Navigator.of(context).push(fadeRoute(AssessmentDetailsScreen(assessmentId: nextAssessment.id))),
-            child: Row(
-              children: [
-                IconBadge(icon: nextAssessment.icon, color: nextAssessment.color),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(nextAssessment.subject, style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 4),
-                      Row(children: [
-                        Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                              '${nextAssessment.timeLimitMinutes} min · ${nextAssessment.totalQuestions} questions · Due ${nextAssessment.dueDate}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ),
-                      ]),
-                    ],
-                  ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: softCardDecoration(),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              onTap: () => Navigator.of(context).push(
+                fadeRoute(
+                  AssessmentDetailsScreen(assessmentId: nextAssessment.id),
                 ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-              ],
+              ),
+              child: Row(
+                children: [
+                  IconBadge(
+                    icon: nextAssessment.icon,
+                    color: nextAssessment.color,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nextAssessment.subject,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.timer_outlined,
+                              size: 14,
+                              color: AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${nextAssessment.duration} min · ${nextAssessment.totalQuestions} questions'
+                              '${nextAssessment.endAt != null ? ' · Due ${formatDisplayDate(nextAssessment.endAt, withTime: true)}' : ''}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 26),
 
-        SectionHeader(title: 'Assigned Subjects', actionLabel: 'View all', onAction: () {}),
+        SectionHeader(
+          title: 'Assigned Subjects',
+          actionLabel: 'View all',
+          onAction: () {},
+        ),
         const SizedBox(height: 12),
         SizedBox(
           height: 148,
@@ -289,11 +404,20 @@ class _DashboardBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconBadge(icon: s.icon, color: s.color, size: 40),
-                    Text(s.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
-                    Text('${s.completed}/${s.totalAssessments} done', style: Theme.of(context).textTheme.bodyMedium),
+                    const Spacer(),
+                    Text(
+                      s.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${s.completed}/${s.totalAssessments} done',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               );
@@ -302,7 +426,11 @@ class _DashboardBody extends StatelessWidget {
         ),
         const SizedBox(height: 26),
 
-        SectionHeader(title: 'Completed Assessments', actionLabel: 'History', onAction: () {}),
+        SectionHeader(
+          title: 'Completed Assessments',
+          actionLabel: 'History',
+          onAction: () {},
+        ),
         const SizedBox(height: 12),
         if (data.history.isEmpty)
           const EmptyState(
@@ -311,29 +439,48 @@ class _DashboardBody extends StatelessWidget {
             subtitle: 'Finished pre-study quizzes will appear here.',
           )
         else
-        ...data.history.take(2).map((h) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: softCardDecoration(),
-                child: Row(
-                  children: [
-                    IconBadge(icon: Icons.check_circle_rounded, color: h.color, size: 42),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(h.subject, style: Theme.of(context).textTheme.titleMedium),
-                          Text(h.date, style: Theme.of(context).textTheme.bodyMedium),
-                        ],
-                      ),
+          ...data.history
+              .take(2)
+              .map(
+                (h) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: softCardDecoration(),
+                    child: Row(
+                      children: [
+                        IconBadge(
+                          icon: Icons.check_circle_rounded,
+                          color: h.color,
+                          size: 42,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                h.quizTitle.isNotEmpty
+                                    ? h.quizTitle
+                                    : h.subject,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                formatDisplayDate(h.submittedAt),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                        StatusPill(
+                          label: '${h.percentage.round()}%',
+                          color: h.color,
+                        ),
+                      ],
                     ),
-                    StatusPill(label: '${h.score}%', color: h.color),
-                  ],
+                  ),
                 ),
               ),
-            )),
       ],
     );
   }

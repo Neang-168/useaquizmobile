@@ -1,11 +1,11 @@
 {
-    "name": "useaquizmobile",
-    "short_name": "useaquizmobile",
+    "name": "USEA Quiz",
+    "short_name": "USEA Quiz",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#002060",
+    "theme_color": "#002060",
+    "description": "Pre-Study IT Knowledge Assessment System (University of Southeast Asia)",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

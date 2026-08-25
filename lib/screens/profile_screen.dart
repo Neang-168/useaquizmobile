@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final body = Column(
       children: [
-        ProfileHeroHeader(name: student.name, subtitle: student.id, onEdit: () => _editProfile(student)),
+        ProfileHeroHeader(name: student.name, subtitle: student.username, onEdit: () => _editProfile(student)),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -87,9 +87,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               ProfileDetailsCard(rows: [
                 (icon: Icons.email_outlined, label: 'Email', value: student.email),
-                (icon: Icons.school_outlined, label: 'Faculty', value: student.faculty),
-                (icon: Icons.book_outlined, label: 'Major', value: student.major),
-                (icon: Icons.calendar_month_outlined, label: 'Academic Year', value: student.academicYear),
+                (icon: Icons.book_outlined, label: 'Major', value: student.major ?? '—'),
+                (icon: Icons.meeting_room_outlined, label: 'Class', value: student.className ?? '—'),
+                (icon: Icons.calendar_month_outlined, label: 'Academic Year', value: student.academicYear ?? '—'),
               ]),
               const SizedBox(height: 22),
 

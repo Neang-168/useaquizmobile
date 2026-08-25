@@ -91,43 +91,34 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                         decoration: softCardDecoration(),
                         child: Column(
                           children: [
-                            _infoRow(context, Icons.person_outline_rounded, 'Lecturer', a.lecturer),
+                            _infoRow(context, Icons.meeting_room_outlined, 'Class', a.className),
                             const Divider(height: 24),
                             _infoRow(context, Icons.quiz_outlined, 'Total Questions', '${a.totalQuestions} questions'),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.timer_outlined, 'Time Limit', '${a.timeLimitMinutes} minutes'),
+                            _infoRow(context, Icons.timer_outlined, 'Time Limit', '${a.duration} minutes'),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.event_available_outlined, 'Available Date', a.availableDate),
+                            _infoRow(context, Icons.military_tech_outlined, 'Total Points / Pass Mark', '${a.totalPoints} pts · ${a.passMark}%'),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.event_busy_outlined, 'Due Date', a.dueDate),
+                            _infoRow(context, Icons.replay_rounded, 'Attempts', '${a.attemptsUsed}/${a.maxAttempts} used'),
+                            const Divider(height: 24),
+                            _infoRow(context, Icons.event_available_outlined, 'Available From',
+                                a.startAt == null ? 'Anytime' : formatDisplayDate(a.startAt, withTime: true)),
+                            const Divider(height: 24),
+                            _infoRow(context, Icons.event_busy_outlined, 'Due Date',
+                                a.endAt == null ? 'No deadline' : formatDisplayDate(a.endAt, withTime: true)),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text('Learning Objectives', style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: softCardDecoration(),
-                        child: Column(
-                          children: a.objectives
-                              .map((o) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Padding(
-                                          padding: EdgeInsets.only(top: 3),
-                                          child: Icon(Icons.check_circle_rounded, color: AppColors.secondary, size: 18),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(child: Text(o, style: Theme.of(context).textTheme.bodyLarge)),
-                                      ],
-                                    ),
-                                  ))
-                              .toList(),
+                      if (a.description.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        Text('About This Quiz', style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: softCardDecoration(),
+                          child: Text(a.description, style: Theme.of(context).textTheme.bodyLarge),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 20),
                       Text('Instructions', style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 10),
@@ -154,8 +145,14 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).push(fadeRoute(AssessmentInstructionsScreen(assessment: a))),
-                    child: const Text('Start Assessment'),
+                    onPressed: (a.attemptsExhausted || a.isClosed)
+                        ? null
+                        : () => Navigator.of(context).push(fadeRoute(AssessmentInstructionsScreen(assessment: a))),
+                    child: Text(a.attemptsExhausted
+                        ? 'Attempts Used Up'
+                        : a.isClosed
+                            ? 'Assessment Closed'
+                            : 'Start Assessment'),
                   ),
                 ),
               ],

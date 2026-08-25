@@ -78,7 +78,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
     final body = Column(
       children: [
-        ProfileHeroHeader(name: teacher.name, subtitle: teacher.id, onEdit: () => _editProfile(teacher)),
+        ProfileHeroHeader(name: teacher.name, subtitle: teacher.username, onEdit: () => _editProfile(teacher)),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -86,9 +86,9 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
               if (result.isDemo) const DemoModeBanner(),
 
               ProfileDetailsCard(rows: [
-                (icon: Icons.school_outlined, label: 'Department', value: teacher.department),
-                (icon: Icons.badge_outlined, label: 'Title', value: teacher.title),
+                (icon: Icons.badge_outlined, label: 'Username', value: teacher.username),
                 (icon: Icons.email_outlined, label: 'Email', value: teacher.email),
+                (icon: Icons.verified_outlined, label: 'Status', value: teacher.status.isEmpty ? '—' : teacher.status),
               ]),
               const SizedBox(height: 22),
 
