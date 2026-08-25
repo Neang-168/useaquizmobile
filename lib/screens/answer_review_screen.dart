@@ -36,7 +36,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('Question ${_current + 1} of ${widget.questions.length}',
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
                       StatusPill(
                         label: isCorrect ? 'Correct' : (studentAnswer == null ? 'Unanswered' : 'Incorrect'),
                         color: isCorrect ? AppColors.secondary : (studentAnswer == null ? AppColors.textMuted : AppColors.danger),
@@ -55,7 +55,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                     final isCorrectOption = i == q.correctIndex;
                     final isStudentPick = i == studentAnswer;
                     Color borderColor = AppColors.border;
-                    Color bg = Colors.white;
+                    Color bg = AppColors.surface;
                     IconData? trailingIcon;
                     Color? iconColor;
 
@@ -110,7 +110,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, -4))],
               ),
               child: Row(

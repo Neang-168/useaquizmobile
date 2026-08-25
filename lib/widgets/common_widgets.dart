@@ -23,7 +23,7 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, -4))],
       ),
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -133,7 +133,7 @@ class SkeletonBox extends StatelessWidget {
     return Container(
       height: height,
       width: width,
-      decoration: BoxDecoration(color: const Color(0xFFE9EEF6), borderRadius: BorderRadius.circular(radius)),
+      decoration: BoxDecoration(color: AppColors.skeleton, borderRadius: BorderRadius.circular(radius)),
     );
   }
 }
@@ -189,6 +189,184 @@ class DemoModeBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Full-bleed gradient hero used atop the student/teacher profile screens:
+/// a large avatar (initials), an edit badge overlapping its bottom-right
+/// corner, the person's name, and a subtitle (their ID).
+class ProfileHeroHeader extends StatelessWidget {
+  final String name;
+  final String subtitle;
+  final VoidCallback onEdit;
+  const ProfileHeroHeader({super.key, required this.name, required this.subtitle, required this.onEdit});
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name.trim().isEmpty
+        ? '?'
+        : name.trim().split(RegExp(r'\s+')).map((w) => w[0]).take(2).join().toUpperCase();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 30, 20, 38),
+      decoration: const BoxDecoration(
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(22), bottomRight: Radius.circular(22)),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 100,
+            height: 100,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 92,
+                  height: 92,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2.5),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: Center(
+                    child: Text(initials,
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Tooltip(
+                    message: 'Edit profile',
+                    child: Material(
+                      color: AppColors.primaryDark,
+                      shape: CircleBorder(side: BorderSide(color: AppColors.surface, width: 2)),
+                      elevation: 2,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: onEdit,
+                        child: const SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: Icon(Icons.edit_rounded, color: Colors.white, size: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+}
+
+typedef ProfileDetailRow = ({IconData icon, String label, String value});
+
+/// Icon/label/value rows (e.g. Email, Faculty, Major) in a `softCardDecoration`
+/// card, used below [ProfileHeroHeader] on the profile screens.
+class ProfileDetailsCard extends StatelessWidget {
+  final List<ProfileDetailRow> rows;
+  const ProfileDetailsCard({super.key, required this.rows});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: softCardDecoration(),
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++) ...[
+            if (i > 0) const Divider(height: 24),
+            _row(context, rows[i]),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, ProfileDetailRow row) {
+    return Row(
+      children: [
+        Icon(row.icon, color: AppColors.textMuted, size: 20),
+        const SizedBox(width: 12),
+        Expanded(child: Text(row.label, style: Theme.of(context).textTheme.bodyMedium)),
+        Flexible(child: Text(row.value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.titleMedium)),
+      ],
+    );
+  }
+}
+
+/// A labeled switch row for the profile "Preferences" card.
+class SettingsSwitchTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const SettingsSwitchTile(
+      {super.key, required this.icon, required this.label, required this.value, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Row(
+        children: [
+          IconBadge(icon: icon, color: AppColors.primary, size: 38),
+          const SizedBox(width: 12),
+          Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
+          Switch(value: value, activeThumbColor: AppColors.primary, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+}
+
+/// A tappable settings row for the profile "Preferences" card. Currently
+/// used for placeholder entries (Settings, Help & Support) with no
+/// destination screen yet, so [onTap] is a no-op.
+class SettingsNavTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const SettingsNavTile({super.key, required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: IconBadge(icon: icon, color: AppColors.primary, size: 38),
+      title: Text(label, style: Theme.of(context).textTheme.titleMedium),
+      trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+      onTap: () {},
+    );
+  }
+}
+
+/// Red outlined "Log Out" button with a loading-spinner state, used on the
+/// student and teacher profile screens.
+class LogoutButton extends StatelessWidget {
+  final bool loading;
+  final VoidCallback? onPressed;
+  const LogoutButton({super.key, required this.loading, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
+      onPressed: loading ? null : onPressed,
+      icon: loading
+          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
+          : const Icon(Icons.logout_rounded, size: 18),
+      label: Text(loading ? 'Logging out...' : 'Log Out'),
     );
   }
 }

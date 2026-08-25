@@ -62,7 +62,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Search class rooms...',
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
@@ -101,7 +101,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                        Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
                       ],
                     ),
                   ),

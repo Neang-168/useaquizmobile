@@ -20,6 +20,12 @@ class AppRepository {
   static final AppRepository instance = AppRepository._();
   final _api = ApiClient.instance;
 
+  // Holds a demo-mode profile edit for the rest of this app run — there's no
+  // backend to persist it to, but it shouldn't just be forgotten on the next
+  // fetch either.
+  Student? _profileOverride;
+  Teacher? _teacherProfileOverride;
+
   // ---------------- Auth ----------------
 
   Future<RepoResult<AuthResult>> login({required String identifier, required String password, required bool remember}) async {
@@ -212,23 +218,44 @@ class AppRepository {
 
   // ---------------- Profile ----------------
 
+  Student get _defaultDemoStudent => Student(
+        id: MockData.studentId,
+        name: MockData.studentName,
+        email: 'sochea.ratanak@usea.edu.kh',
+        faculty: MockData.faculty,
+        major: MockData.major,
+        academicYear: MockData.academicYear,
+      );
+
   Future<RepoResult<Student>> fetchProfile() async {
     try {
       final json = await _api.get('/profile');
       return RepoResult(Student.fromJson(Map<String, dynamic>.from(json)));
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult(
-        Student(
-          id: MockData.studentId,
-          name: MockData.studentName,
-          email: 'sochea.ratanak@usea.edu.kh',
-          faculty: MockData.faculty,
-          major: MockData.major,
-          academicYear: MockData.academicYear,
-        ),
-        isDemo: true,
+      return RepoResult(_profileOverride ?? _defaultDemoStudent, isDemo: true);
+    }
+  }
+
+  Future<RepoResult<Student>> updateProfile({required String name, required String email}) async {
+    try {
+      final json = await _api.patch('/profile', body: {'name': name, 'email': email});
+      final updated = Student.fromJson(Map<String, dynamic>.from(json));
+      _profileOverride = updated;
+      return RepoResult(updated);
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      final current = _profileOverride ?? _defaultDemoStudent;
+      final updated = Student(
+        id: current.id,
+        name: name,
+        email: email,
+        faculty: current.faculty,
+        major: current.major,
+        academicYear: current.academicYear,
       );
+      _profileOverride = updated;
+      return RepoResult(updated, isDemo: true);
     }
   }
 
@@ -243,22 +270,42 @@ class AppRepository {
 
   // ---------------- Teacher ----------------
 
+  Teacher get _defaultDemoTeacher => const Teacher(
+        id: MockData.teacherId,
+        name: MockData.teacherName,
+        email: MockData.teacherEmail,
+        department: MockData.teacherDepartment,
+        title: MockData.teacherTitle,
+      );
+
   Future<RepoResult<Teacher>> fetchTeacherProfile() async {
     try {
       final json = await _api.get('/teacher/profile');
       return RepoResult(Teacher.fromJson(Map<String, dynamic>.from(json)));
     } on ApiException catch (e) {
       if (!e.isConnectivity) rethrow;
-      return RepoResult(
-        const Teacher(
-          id: MockData.teacherId,
-          name: MockData.teacherName,
-          email: MockData.teacherEmail,
-          department: MockData.teacherDepartment,
-          title: MockData.teacherTitle,
-        ),
-        isDemo: true,
+      return RepoResult(_teacherProfileOverride ?? _defaultDemoTeacher, isDemo: true);
+    }
+  }
+
+  Future<RepoResult<Teacher>> updateTeacherProfile({required String name, required String email}) async {
+    try {
+      final json = await _api.patch('/teacher/profile', body: {'name': name, 'email': email});
+      final updated = Teacher.fromJson(Map<String, dynamic>.from(json));
+      _teacherProfileOverride = updated;
+      return RepoResult(updated);
+    } on ApiException catch (e) {
+      if (!e.isConnectivity) rethrow;
+      final current = _teacherProfileOverride ?? _defaultDemoTeacher;
+      final updated = Teacher(
+        id: current.id,
+        name: name,
+        email: email,
+        department: current.department,
+        title: current.title,
       );
+      _teacherProfileOverride = updated;
+      return RepoResult(updated, isDemo: true);
     }
   }
 

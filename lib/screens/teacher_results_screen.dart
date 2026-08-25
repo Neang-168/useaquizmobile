@@ -77,7 +77,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Search by student or subject...',
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
@@ -97,11 +97,11 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
                   selected: selected,
                   onSelected: (_) => setState(() => _filter = f),
                   selectedColor: AppColors.primary,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.surface,
                   labelStyle: TextStyle(
                       color: selected ? Colors.white : AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 12.5),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.pill), side: const BorderSide(color: AppColors.border)),
+                      borderRadius: BorderRadius.circular(AppRadius.pill), side: BorderSide(color: AppColors.border)),
                 ),
               );
             }).toList(),
@@ -137,7 +137,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
                               Text('${r.subjectName} · ${r.className}', style: Theme.of(context).textTheme.bodyMedium),
                               const SizedBox(height: 2),
                               Row(children: [
-                                const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
+                                Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
                                 const SizedBox(width: 4),
                                 Text(r.date, style: Theme.of(context).textTheme.bodyMedium),
                               ]),

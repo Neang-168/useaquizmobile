@@ -100,7 +100,7 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                                     ],
                                   ),
                                 ),
-                                const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
                               ],
                             ),
                           ),

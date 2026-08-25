@@ -84,7 +84,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Search subjects...',
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
@@ -104,13 +104,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                   selected: selected,
                   onSelected: (_) => setState(() => _semester = sem),
                   selectedColor: AppColors.primary,
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppColors.surface,
                   labelStyle: TextStyle(
                       color: selected ? Colors.white : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                       fontSize: 12.5),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.pill), side: const BorderSide(color: AppColors.border)),
+                      borderRadius: BorderRadius.circular(AppRadius.pill), side: BorderSide(color: AppColors.border)),
                 ),
               );
             }).toList(),

@@ -71,7 +71,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: n.unread ? AppColors.primary.withValues(alpha: 0.05) : Colors.white,
+                          color: n.unread ? AppColors.primary.withValues(alpha: 0.05) : AppColors.surface,
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                           border: n.unread ? Border.all(color: AppColors.primary.withValues(alpha: 0.2)) : null,
                           boxShadow: n.unread

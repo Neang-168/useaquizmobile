@@ -197,7 +197,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Question ${_current + 1} of ${_assessment.questions.length}',
-                      style: const TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
                   GestureDetector(
                     onTap: () => setState(() => _flagged[_current] = !_flagged[_current]),
                     child: Row(
@@ -240,7 +240,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: selected ? AppColors.primary.withValues(alpha: 0.08) : Colors.white,
+                            color: selected ? AppColors.primary.withValues(alpha: 0.08) : AppColors.surface,
                             borderRadius: BorderRadius.circular(AppRadius.md),
                             border: Border.all(color: selected ? AppColors.primary : AppColors.border, width: selected ? 1.6 : 1),
                           ),
@@ -280,7 +280,7 @@ class _QuizScreenState extends State<QuizScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 16, offset: const Offset(0, -4))],
               ),
               child: Row(

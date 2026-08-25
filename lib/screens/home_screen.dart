@@ -150,13 +150,13 @@ class _DashboardBody extends StatelessWidget {
               child: Container(
                 width: 46,
                 height: 46,
-                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [
+                decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, boxShadow: [
                   BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
                 ]),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
+                    Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
                     Positioned(
                       top: 11,
                       right: 12,
@@ -250,16 +250,20 @@ class _DashboardBody extends StatelessWidget {
                       Text(nextAssessment.subject, style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 4),
                       Row(children: [
-                        const Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
+                        Icon(Icons.timer_outlined, size: 14, color: AppColors.textMuted),
                         const SizedBox(width: 4),
-                        Text(
-                            '${nextAssessment.timeLimitMinutes} min · ${nextAssessment.totalQuestions} questions · Due ${nextAssessment.dueDate}',
-                            style: Theme.of(context).textTheme.bodyMedium),
+                        Expanded(
+                          child: Text(
+                              '${nextAssessment.timeLimitMinutes} min · ${nextAssessment.totalQuestions} questions · Due ${nextAssessment.dueDate}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ),
                       ]),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+                Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
               ],
             ),
           ),
@@ -269,7 +273,7 @@ class _DashboardBody extends StatelessWidget {
         SectionHeader(title: 'Assigned Subjects', actionLabel: 'View all', onAction: () {}),
         const SizedBox(height: 12),
         SizedBox(
-          height: 132,
+          height: 148,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: data.subjects.length,
@@ -282,14 +286,13 @@ class _DashboardBody extends StatelessWidget {
                 decoration: softCardDecoration(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconBadge(icon: s.icon, color: s.color, size: 40),
-                    const Spacer(),
                     Text(s.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 13)),
-                    const SizedBox(height: 4),
                     Text('${s.completed}/${s.totalAssessments} done', style: Theme.of(context).textTheme.bodyMedium),
                   ],
                 ),

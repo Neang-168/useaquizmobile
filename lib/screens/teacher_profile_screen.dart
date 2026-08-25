@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'login_screen.dart';
+import 'edit_teacher_profile_screen.dart';
 
 class TeacherProfileScreen extends StatefulWidget {
   final bool embedded;
@@ -15,7 +16,6 @@ class TeacherProfileScreen extends StatefulWidget {
 
 class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
   bool _notificationsOn = true;
-  bool _darkMode = false;
   bool _loggingOut = false;
   late Future<RepoResult<Teacher>> _future;
 
@@ -27,7 +27,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   Future<void> _savePreferences() async {
     try {
-      await AppRepository.instance.updatePreferences(notifications: _notificationsOn, darkMode: _darkMode);
+      await AppRepository.instance.updatePreferences(notifications: _notificationsOn, darkMode: ThemeController.isDark.value);
     } catch (_) {
       // best-effort; preferences already reflected in local UI state
     }
@@ -40,18 +40,30 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
     Navigator.of(context).pushAndRemoveUntil(fadeRoute(const LoginScreen()), (r) => false);
   }
 
+  Future<void> _editProfile(Teacher teacher) async {
+    final updated = await Navigator.of(context).push<bool>(fadeRoute(EditTeacherProfileScreen(teacher: teacher)));
+    if (updated == true) {
+      setState(() {
+        _future = AppRepository.instance.fetchTeacherProfile();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<RepoResult<Teacher>>(
       future: _future,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          final loading = ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            children: const [
-              SkeletonBox(height: 40, radius: 12),
-              SizedBox(height: 20),
-              SkeletonBox(height: 190, radius: 20),
+          final loading = Column(
+            children: [
+              const SkeletonBox(height: 240, radius: 0),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  children: const [SkeletonBox(height: 190, radius: 20)],
+                ),
+              ),
             ],
           );
           return widget.embedded ? loading : Scaffold(body: SafeArea(child: loading));
@@ -63,130 +75,68 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
 
   Widget _buildBody(BuildContext context, RepoResult<Teacher> result) {
     final teacher = result.data;
-    final initials = teacher.name.trim().isEmpty
-        ? '?'
-        : teacher.name.trim().split(RegExp(r'\s+')).map((w) => w[0]).take(2).join().toUpperCase();
 
-    final body = ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+    final body = Column(
       children: [
-        Text('Profile', style: Theme.of(context).textTheme.headlineMedium),
-        const SizedBox(height: 14),
-        if (result.isDemo) const DemoModeBanner(),
-        const SizedBox(height: 6),
-
-        Container(
-          padding: const EdgeInsets.all(20),
-          width: double.infinity,
-          decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(AppRadius.lg)),
-          child: Column(
+        ProfileHeroHeader(name: teacher.name, subtitle: teacher.id, onEdit: () => _editProfile(teacher)),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             children: [
+              if (result.isDemo) const DemoModeBanner(),
+
+              ProfileDetailsCard(rows: [
+                (icon: Icons.school_outlined, label: 'Department', value: teacher.department),
+                (icon: Icons.badge_outlined, label: 'Title', value: teacher.title),
+                (icon: Icons.email_outlined, label: 'Email', value: teacher.email),
+              ]),
+              const SizedBox(height: 22),
+
+              Text('Preferences', style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 10),
               Container(
-                width: 76,
-                height: 76,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 3),
-                ),
-                child: Center(
-                  child: Text(initials, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: AppColors.primary)),
+                decoration: softCardDecoration(),
+                child: Column(
+                  children: [
+                    SettingsSwitchTile(
+                      icon: Icons.notifications_outlined,
+                      label: 'Notifications',
+                      value: _notificationsOn,
+                      onChanged: (v) {
+                        setState(() => _notificationsOn = v);
+                        _savePreferences();
+                      },
+                    ),
+                    const Divider(height: 1, indent: 60),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: ThemeController.isDark,
+                      builder: (context, isDark, _) => SettingsSwitchTile(
+                        icon: Icons.dark_mode_outlined,
+                        label: 'Dark Mode',
+                        value: isDark,
+                        onChanged: (v) {
+                          ThemeController.setDark(v);
+                          _savePreferences();
+                        },
+                      ),
+                    ),
+                    const Divider(height: 1, indent: 60),
+                    const SettingsNavTile(icon: Icons.settings_outlined, label: 'Settings'),
+                    const Divider(height: 1, indent: 60),
+                    const SettingsNavTile(icon: Icons.help_outline_rounded, label: 'Help & Support'),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Text(teacher.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(teacher.id, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+              const SizedBox(height: 22),
+
+              LogoutButton(loading: _loggingOut, onPressed: _logout),
             ],
           ),
-        ),
-        const SizedBox(height: 16),
-
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: softCardDecoration(),
-          child: Column(
-            children: [
-              _detailRow(context, Icons.school_outlined, 'Department', teacher.department),
-              const Divider(height: 24),
-              _detailRow(context, Icons.badge_outlined, 'Title', teacher.title),
-              const Divider(height: 24),
-              _detailRow(context, Icons.email_outlined, 'Email', teacher.email),
-            ],
-          ),
-        ),
-        const SizedBox(height: 22),
-
-        Text('Preferences', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 10),
-        Container(
-          decoration: softCardDecoration(),
-          child: Column(
-            children: [
-              _switchTile(context, Icons.notifications_outlined, 'Notifications', _notificationsOn, (v) {
-                setState(() => _notificationsOn = v);
-                _savePreferences();
-              }),
-              const Divider(height: 1, indent: 60),
-              _switchTile(context, Icons.dark_mode_outlined, 'Dark Mode', _darkMode, (v) {
-                setState(() => _darkMode = v);
-                _savePreferences();
-              }),
-              const Divider(height: 1, indent: 60),
-              _navTile(context, Icons.settings_outlined, 'Settings'),
-              const Divider(height: 1, indent: 60),
-              _navTile(context, Icons.help_outline_rounded, 'Help & Support'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 22),
-
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
-          onPressed: _loggingOut ? null : _logout,
-          icon: _loggingOut
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
-              : const Icon(Icons.logout_rounded, size: 18),
-          label: Text(_loggingOut ? 'Logging out...' : 'Log Out'),
         ),
       ],
     );
 
     if (widget.embedded) return body;
     return Scaffold(body: SafeArea(child: body));
-  }
-
-  Widget _detailRow(BuildContext context, IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.textMuted, size: 20),
-        const SizedBox(width: 12),
-        Expanded(child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
-        Flexible(child: Text(value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.titleMedium)),
-      ],
-    );
-  }
-
-  Widget _switchTile(BuildContext context, IconData icon, String label, bool value, ValueChanged<bool> onChanged) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Row(
-        children: [
-          IconBadge(icon: icon, color: AppColors.primary, size: 38),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-          Switch(value: value, activeColor: AppColors.primary, onChanged: onChanged),
-        ],
-      ),
-    );
-  }
-
-  Widget _navTile(BuildContext context, IconData icon, String label) {
-    return ListTile(
-      leading: IconBadge(icon: icon, color: AppColors.primary, size: 38),
-      title: Text(label, style: Theme.of(context).textTheme.titleMedium),
-      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-      onTap: () {},
-    );
   }
 }

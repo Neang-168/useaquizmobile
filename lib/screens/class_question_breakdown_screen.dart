@@ -129,7 +129,7 @@ class _ClassQuestionBreakdownScreenState extends State<ClassQuestionBreakdownScr
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Question ${i + 1}',
-                                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
+                                    style: TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
                                 if (needsReview) const StatusPill(label: 'Needs review', color: AppColors.danger),
                               ],
                             ),

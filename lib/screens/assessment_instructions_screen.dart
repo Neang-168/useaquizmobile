@@ -39,7 +39,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(a.subject, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 4),
-                        const Text('Read the instructions carefully before you begin', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
+                        Text('Read the instructions carefully before you begin', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
                       ],
                     ),
                   ),

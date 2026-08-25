@@ -17,6 +17,8 @@ class _Brand {
   static const pageBg = Color(0xFFEEF1FB);
   static const fieldFill = Color(0xFFF1F2FB);
   static const textDark = Color(0xFF1E1B3A);
+  static const secondary = Color(0xFF64748B);
+  static const muted = Color(0xFF94A3B8);
 }
 
 class LoginScreen extends StatefulWidget {
@@ -64,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
   InputDecoration _fieldDecoration({required String hint, required Widget prefixIcon, Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+      hintStyle: const TextStyle(color: _Brand.muted, fontSize: 14),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       filled: true,
@@ -85,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
       style: const TextStyle(
         fontSize: 11.5,
         fontWeight: FontWeight.w700,
-        color: AppColors.textSecondary,
+        color: _Brand.secondary,
         letterSpacing: 0.4,
       ),
     );
@@ -124,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Text(
                 "Welcome back! Sign in to continue your pre-study assessments.",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                style: TextStyle(fontSize: 13, color: _Brand.secondary, height: 1.4),
               ),
               const SizedBox(height: 16),
               Row(
@@ -162,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _idController,
                       decoration: _fieldDecoration(
                         hint: 'ITU2023-0142',
-                        prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.textMuted, size: 20),
+                        prefixIcon: const Icon(Icons.badge_outlined, color: _Brand.muted, size: 20),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -184,10 +186,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: _obscure,
                       decoration: _fieldDecoration(
                         hint: 'Enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textMuted, size: 20),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: _Brand.muted, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                              color: AppColors.textMuted, size: 20),
+                              color: _Brand.muted, size: 20),
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
@@ -207,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text('Remember me', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                        const Text('Remember me', style: TextStyle(fontSize: 13, color: _Brand.secondary)),
                       ],
                     ),
                     const SizedBox(height: 18),
