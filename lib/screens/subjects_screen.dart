@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'subject_quizzes_screen.dart';
@@ -27,7 +28,7 @@ class SubjectsScreen extends StatefulWidget {
 class _SubjectsScreenState extends State<SubjectsScreen> {
   String _query = '';
   String _classFilter = 'All';
-  late Future<RepoResult<List<Subject>>> _future;
+  late Future<List<Subject>> _future;
 
   @override
   void initState() {
@@ -41,16 +42,24 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     final next = AppRepository.instance.fetchSubjects(
       classRoomId: widget.classRoomId,
     );
-    await next;
+    try {
+      await next;
+    } catch (_) {
+      // Keep showing the previous list; the indicator just stops spinning.
+    }
     if (mounted) setState(() => _future = next);
   }
 
+  void _retry() => setState(() {
+        _future = AppRepository.instance.fetchSubjects(classRoomId: widget.classRoomId);
+      });
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RepoResult<List<Subject>>>(
+    return FutureBuilder<List<Subject>>(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           final loading = ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: const [
@@ -72,17 +81,28 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             body: SafeArea(top: false, child: loading),
           );
         }
+        if (snapshot.hasError) {
+          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          if (widget.embedded) return error;
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(widget.classRoomName ?? 'Subjects'),
+              leading: const BackButton(),
+            ),
+            body: SafeArea(top: false, child: error),
+          );
+        }
         return _buildBody(context, snapshot.data!);
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, RepoResult<List<Subject>> result) {
+  Widget _buildBody(BuildContext context, List<Subject> subjects) {
     final classNames = [
       'All',
-      ...result.data.map((s) => s.className).where((c) => c.isNotEmpty).toSet(),
+      ...subjects.map((s) => s.className).where((c) => c.isNotEmpty).toSet(),
     ];
-    final filtered = result.data.where((s) {
+    final filtered = subjects.where((s) {
       final matchesQuery = s.name.toLowerCase().contains(_query.toLowerCase());
       final matchesClass = _classFilter == 'All' || s.className == _classFilter;
       return matchesQuery && matchesClass;
@@ -103,8 +123,6 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 14),
-        if (result.isDemo) const DemoModeBanner(),
-        const SizedBox(height: 4),
 
         TextField(
           onChanged: (v) => setState(() => _query = v),

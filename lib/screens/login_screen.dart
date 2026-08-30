@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
         remember: _rememberMe,
       );
       if (!mounted) return;
-      final home = result.data.role == UserRole.teacher ? const TeacherHomeScreen() : const HomeScreen();
+      final home = result.role == UserRole.teacher ? const TeacherHomeScreen() : const HomeScreen();
       Navigator.of(context).pushReplacement(fadeRoute(home));
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 18),
               const Text(
-                'University Quiz Management System',
+                'UNIVERSIT OF SOUTH-EAST ASIA',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: _Brand.textDark, height: 1.3),
               ),
@@ -229,14 +229,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? const SizedBox(
                                 width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
                             : const Text('Login'),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Center(
-                      child: Text(
-                        'Demo: any Student ID signs in as a student · an ID starting with TCH signs in as a teacher.',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11.5),
                       ),
                     ),
                   ],

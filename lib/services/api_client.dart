@@ -15,6 +15,11 @@ class ApiException implements Exception {
   String toString() => 'ApiException($statusCode): $message';
 }
 
+/// Human-readable text for an error caught from a repository call —
+/// used by screens to populate an [ErrorStateView].
+String describeApiError(Object error) =>
+    error is ApiException ? error.message : 'Something went wrong. Please try again.';
+
 /// Thin wrapper around package:http that adds base URL, auth header,
 /// timeouts, and consistent JSON/error handling.
 class ApiClient {

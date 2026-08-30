@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'assessment_instructions_screen.dart';
@@ -14,7 +15,7 @@ class AssessmentDetailsScreen extends StatefulWidget {
 }
 
 class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
-  late Future<RepoResult<Assessment>> _future;
+  late Future<Assessment> _future;
 
   @override
   void initState() {
@@ -28,17 +29,18 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
       appBar: AppBar(title: const Text('Assessment Details'), leading: const BackButton()),
       body: SafeArea(
         top: false,
-        child: FutureBuilder<RepoResult<Assessment>>(
+        child: FutureBuilder<Assessment>(
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return EmptyState(
-                icon: Icons.error_outline_rounded,
-                title: 'Couldn\'t load assessment',
-                subtitle: '${snapshot.error}',
+              return ErrorStateView(
+                message: describeApiError(snapshot.error!),
+                onRetry: () => setState(() {
+                  _future = AppRepository.instance.fetchAssessment(widget.assessmentId);
+                }),
               );
             }
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Padding(
                 padding: EdgeInsets.all(20),
                 child: Column(children: [
@@ -48,15 +50,13 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                 ]),
               );
             }
-            final result = snapshot.data!;
-            final a = result.data;
+            final a = snapshot.data!;
             return Column(
               children: [
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                     children: [
-                      if (result.isDemo) const DemoModeBanner(),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(

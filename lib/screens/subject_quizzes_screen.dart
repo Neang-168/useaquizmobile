@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'assessment_details_screen.dart';
@@ -23,7 +24,7 @@ class SubjectQuizzesScreen extends StatefulWidget {
 }
 
 class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
-  late Future<RepoResult<List<Assessment>>> _future;
+  late Future<List<Assessment>> _future;
 
   @override
   void initState() {
@@ -37,7 +38,11 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
     final next = AppRepository.instance.fetchAssessmentsBySubject(
       widget.subjectId,
     );
-    await next;
+    try {
+      await next;
+    } catch (_) {
+      // Keep showing the previous list; the indicator just stops spinning.
+    }
     if (mounted) setState(() => _future = next);
   }
 
@@ -50,17 +55,18 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: FutureBuilder<RepoResult<List<Assessment>>>(
+        child: FutureBuilder<List<Assessment>>(
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return EmptyState(
-                icon: Icons.error_outline_rounded,
-                title: 'Couldn\'t load quizzes',
-                subtitle: '${snapshot.error}',
+              return ErrorStateView(
+                message: describeApiError(snapshot.error!),
+                onRetry: () => setState(() {
+                  _future = AppRepository.instance.fetchAssessmentsBySubject(widget.subjectId);
+                }),
               );
             }
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Padding(
                 padding: EdgeInsets.all(20),
                 child: Column(
@@ -72,8 +78,7 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                 ),
               );
             }
-            final result = snapshot.data!;
-            final quizzes = result.data;
+            final quizzes = snapshot.data!;
 
             return RefreshIndicator(
               onRefresh: _refresh,
@@ -82,7 +87,6 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 children: [
-                  if (result.isDemo) const DemoModeBanner(),
                   Text(
                     'All Quiz',
                     style: Theme.of(context).textTheme.headlineMedium,

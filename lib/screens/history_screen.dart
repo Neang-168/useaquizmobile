@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 
@@ -15,7 +16,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   String _query = '';
   String _filter = 'All';
-  late Future<RepoResult<List<HistoryItem>>> _future;
+  late Future<List<HistoryItem>> _future;
 
   @override
   void initState() {
@@ -23,12 +24,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _future = AppRepository.instance.fetchHistory();
   }
 
+  void _retry() => setState(() => _future = AppRepository.instance.fetchHistory());
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RepoResult<List<HistoryItem>>>(
+    return FutureBuilder<List<HistoryItem>>(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           final loading = ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: const [
@@ -39,15 +42,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
               SkeletonBox(height: 84, radius: 20),
             ],
           );
-          return widget.embedded ? loading : Scaffold(body: SafeArea(child: loading));
+          if (widget.embedded) return loading;
+          return Scaffold(
+            appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+            body: SafeArea(top: false, child: loading),
+          );
+        }
+        if (snapshot.hasError) {
+          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          if (widget.embedded) return error;
+          return Scaffold(
+            appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+            body: SafeArea(top: false, child: error),
+          );
         }
         return _buildBody(context, snapshot.data!);
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, RepoResult<List<HistoryItem>> result) {
-    final filtered = result.data.where((h) {
+  Widget _buildBody(BuildContext context, List<HistoryItem> history) {
+    final filtered = history.where((h) {
       final q = _query.toLowerCase();
       final matchesQuery = h.subject.toLowerCase().contains(q) || h.quizTitle.toLowerCase().contains(q);
       final matchesFilter = _filter == 'All' || h.level.label == _filter;
@@ -61,8 +76,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         const SizedBox(height: 4),
         Text('Track all your completed pre-study assessments', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
-        if (result.isDemo) const DemoModeBanner(),
-        const SizedBox(height: 4),
         TextField(
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
@@ -143,6 +156,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
 
     if (widget.embedded) return body;
-    return Scaffold(body: SafeArea(child: body));
+    return Scaffold(
+      appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+      body: SafeArea(top: false, child: body),
+    );
   }
 }

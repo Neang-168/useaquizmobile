@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 
@@ -12,7 +13,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
-  late Future<RepoResult<List<AppNotification>>> _future;
+  late Future<List<AppNotification>> _future;
 
   @override
   void initState() {
@@ -41,10 +42,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: FutureBuilder<RepoResult<List<AppNotification>>>(
+        child: FutureBuilder<List<AppNotification>>(
           future: _future,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Padding(
                 padding: EdgeInsets.fromLTRB(20, 8, 20, 24),
                 child: Column(children: [
@@ -56,8 +57,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ]),
               );
             }
-            final result = snapshot.data!;
-            final notifications = result.data;
+            if (snapshot.hasError) {
+              return ErrorStateView(
+                message: describeApiError(snapshot.error!),
+                onRetry: () => setState(() => _future = AppRepository.instance.fetchNotifications()),
+              );
+            }
+            final notifications = snapshot.data!;
             if (notifications.isEmpty) {
               return const EmptyState(
                   icon: Icons.notifications_off_outlined, title: 'No notifications', subtitle: 'You\'re all caught up!');
@@ -65,7 +71,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
-                if (result.isDemo) const DemoModeBanner(),
                 ...notifications.map((n) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Container(

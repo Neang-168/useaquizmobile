@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'assessment_result_screen.dart';
@@ -19,7 +20,7 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late Future<RepoResult<Assessment>> _future;
+  late Future<Assessment> _future;
 
   @override
   void initState() {
@@ -32,17 +33,18 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: FutureBuilder<RepoResult<Assessment>>(
+        child: FutureBuilder<Assessment>(
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return EmptyState(
-                icon: Icons.error_outline_rounded,
-                title: 'Couldn\'t start this quiz',
-                subtitle: '${snapshot.error}',
+              return ErrorStateView(
+                message: describeApiError(snapshot.error!),
+                onRetry: () => setState(() {
+                  _future = AppRepository.instance.startAssessment(widget.assessment.id);
+                }),
               );
             }
-            if (!snapshot.hasData) {
+            if (snapshot.connectionState != ConnectionState.done) {
               return const Padding(
                 padding: EdgeInsets.all(20),
                 child: Column(
@@ -54,18 +56,15 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               );
             }
-            final result = snapshot.data!;
-            if (result.data.questions.isEmpty) {
+            final assessment = snapshot.data!;
+            if (assessment.questions.isEmpty) {
               return const EmptyState(
                 icon: Icons.quiz_outlined,
                 title: 'No questions available',
                 subtitle: 'This quiz has no questions to take right now.',
               );
             }
-            return _QuizTakingView(
-              assessment: result.data,
-              isDemo: result.isDemo,
-            );
+            return _QuizTakingView(assessment: assessment);
           },
         ),
       ),
@@ -84,8 +83,7 @@ class _AnswerState {
 
 class _QuizTakingView extends StatefulWidget {
   final Assessment assessment;
-  final bool isDemo;
-  const _QuizTakingView({required this.assessment, required this.isDemo});
+  const _QuizTakingView({required this.assessment});
 
   @override
   State<_QuizTakingView> createState() => _QuizTakingViewState();
@@ -179,8 +177,9 @@ class _QuizTakingViewState extends State<_QuizTakingView>
   bool _isAnswered(int i) {
     final q = _assessment.questions[i];
     final a = _answers[i];
-    if (q.isMatching)
+    if (q.isMatching) {
       return a.matches.isNotEmpty && a.matches.values.every((v) => v != null);
+    }
     if (q.multiSelect) return a.selectedOptionIds.isNotEmpty;
     return a.selectedOptionId != null;
   }
@@ -241,8 +240,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
         fadeRoute(
           AssessmentResultScreen(
             subjectName: _assessment.subject,
-            result: result.data,
-            isDemo: result.isDemo || widget.isDemo,
+            result: result,
           ),
         ),
       );

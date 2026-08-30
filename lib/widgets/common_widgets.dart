@@ -1,4 +1,6 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
 
 typedef BottomNavItem = ({IconData icon, String label});
@@ -168,24 +170,38 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Shown when the repository fell back to mock data because the REST API
-/// couldn't be reached, so the demo experience stays honest about its state.
-class DemoModeBanner extends StatelessWidget {
-  const DemoModeBanner({super.key});
+/// Shown in place of a screen's content when its data failed to load —
+/// a network error, an expired session that isn't a clean 401, etc.
+/// [message] should be the caught [ApiException]'s human-readable text.
+class ErrorStateView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const ErrorStateView({super.key, required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.sm)),
-      child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
         children: [
-          const Icon(Icons.cloud_off_rounded, size: 16, color: AppColors.warning),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text('Showing demo data — the API server isn\'t reachable right now.',
-                style: TextStyle(fontSize: 11.5, color: const Color(0xFF92400E).withValues(alpha: 0.9), fontWeight: FontWeight.w500)),
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(color: AppColors.danger.withValues(alpha: 0.08), shape: BoxShape.circle),
+            child: const Icon(Icons.cloud_off_rounded, size: 38, color: AppColors.danger),
+          ),
+          const SizedBox(height: 16),
+          Text('Couldn\'t load this', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Retry'),
           ),
         ],
       ),
@@ -193,81 +209,211 @@ class DemoModeBanner extends StatelessWidget {
   }
 }
 
-/// Full-bleed gradient hero used atop the student/teacher profile screens:
-/// a large avatar (initials), an edit badge overlapping its bottom-right
-/// corner, the person's name, and a subtitle (their ID).
-class ProfileHeroHeader extends StatelessWidget {
-  final String name;
-  final String subtitle;
-  final VoidCallback onEdit;
-  const ProfileHeroHeader({super.key, required this.name, required this.subtitle, required this.onEdit});
+/// Full-bleed navy header (USEA crest, org name, tappable initials avatar)
+/// used atop the student/teacher Profile screens. Pair with [GaugeStatCard],
+/// which overlaps its bottom edge.
+class BrandHeaderBar extends StatelessWidget {
+  final String initials;
+  final VoidCallback? onAvatarTap;
+  const BrandHeaderBar({super.key, required this.initials, this.onAvatarTap});
 
   @override
   Widget build(BuildContext context) {
-    final initials = name.trim().isEmpty
-        ? '?'
-        : name.trim().split(RegExp(r'\s+')).map((w) => w[0]).take(2).join().toUpperCase();
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 38),
-      decoration: const BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(22), bottomRight: Radius.circular(22)),
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 100,
-            height: 100,
-            child: Stack(
-              clipBehavior: Clip.none,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Container(
+        width: double.infinity,
+        color: AppColors.primary,
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            child: Row(
               children: [
                 Container(
-                  width: 92,
-                  height: 92,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2.5),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))],
-                  ),
-                  child: Center(
-                    child: Text(initials,
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  width: 42,
+                  height: 42,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(11)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.asset('assets/usealogo.jpg', fit: BoxFit.contain),
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Tooltip(
-                    message: 'Edit profile',
-                    child: Material(
-                      color: AppColors.primaryDark,
-                      shape: CircleBorder(side: BorderSide(color: AppColors.surface, width: 2)),
-                      elevation: 2,
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: onEdit,
-                        child: const SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: Icon(Icons.edit_rounded, color: Colors.white, size: 14),
-                        ),
-                      ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'UNIVERSITY OF\nSOUTH-EAST ASIA',
+                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700, height: 1.3, letterSpacing: 0.3),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: onAvatarTap,
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 1.5),
+                    ),
+                    child: Center(
+                      child: Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          Text(name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
-          Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
-        ],
+        ),
       ),
     );
+  }
+}
+
+/// White card with a circular percent gauge and a two-line color legend,
+/// floating over the bottom edge of a [BrandHeaderBar]. The overlap is done
+/// with [Transform.translate] — it only shifts where the card is *painted*,
+/// leaving its layout box (and the space siblings see) untouched, so it
+/// can't hit the non-negative-inset assertions that both [Container.margin]
+/// and [Padding] enforce. The gap that leaves behind is intentional: it
+/// becomes the breathing room before the next section, so callers shouldn't
+/// add extra spacing directly after this widget.
+class GaugeStatCard extends StatelessWidget {
+  final String title;
+  final double percent;
+  final String centerLabel;
+  final String doneLabel;
+  final String remainingLabel;
+  const GaugeStatCard({
+    super.key,
+    required this.title,
+    required this.percent,
+    required this.centerLabel,
+    required this.doneLabel,
+    required this.remainingLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Transform.translate(
+        // Kept smaller than softCardDecoration's corner radius (AppRadius.lg
+        // = 20) so the card's rounded top stays visible below the header
+        // instead of being pulled entirely behind it, which reads as a
+        // flush square seam instead of a floating card.
+        offset: const Offset(0, -16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: softCardDecoration(),
+          child: Row(
+            children: [
+              CircularPercentIndicator(
+                radius: 50,
+                lineWidth: 11,
+                percent: percent.clamp(0, 1),
+                backgroundColor: AppColors.skeleton,
+                progressColor: AppColors.primary,
+                circularStrokeCap: CircularStrokeCap.round,
+                center: Text(centerLabel,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary)),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 12),
+                    _LegendDot(color: AppColors.primary, label: doneLabel),
+                    const SizedBox(height: 8),
+                    _LegendDot(color: AppColors.skeleton, label: remainingLabel),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        ),
+      ],
+    );
+  }
+}
+
+/// One tappable shortcut card (icon + label) for a [ShortcutGrid].
+class ShortcutTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const ShortcutTile({super.key, required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+        decoration: softCardDecoration(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconBadge(icon: icon, color: AppColors.primary, size: 46),
+            const SizedBox(height: 10),
+            Text(label, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Lays [tiles] out two per row, each row's height set by its own content
+/// (not a fixed aspect ratio), so a long label or a larger text-scale
+/// setting can't overflow the card.
+class ShortcutGrid extends StatelessWidget {
+  final List<ShortcutTile> tiles;
+  const ShortcutGrid({super.key, required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var i = 0; i < tiles.length; i += 2) {
+      final hasSecond = i + 1 < tiles.length;
+      if (rows.isNotEmpty) rows.add(const SizedBox(height: 12));
+      rows.add(IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(child: tiles[i]),
+            const SizedBox(width: 12),
+            Expanded(child: hasSecond ? tiles[i + 1] : const SizedBox()),
+          ],
+        ),
+      ));
+    }
+    return Column(children: rows);
   }
 }
 
@@ -296,12 +442,20 @@ class ProfileDetailsCard extends StatelessWidget {
   }
 
   Widget _row(BuildContext context, ProfileDetailRow row) {
+    // The label gets a fixed column (not Expanded) so a short word like
+    // "Email" doesn't claim half the row and squeeze a long, unbreakable
+    // value (e.g. an email address) into an awkward mid-word wrap.
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(row.icon, color: AppColors.textMuted, size: 20),
         const SizedBox(width: 12),
-        Expanded(child: Text(row.label, style: Theme.of(context).textTheme.bodyMedium)),
-        Flexible(child: Text(row.value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.titleMedium)),
+        SizedBox(
+          width: 112,
+          child: Text(row.label, style: Theme.of(context).textTheme.bodyMedium),
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Text(row.value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.titleMedium)),
       ],
     );
   }

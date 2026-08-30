@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'subjects_screen.dart';
@@ -16,7 +17,7 @@ class ClassRoomsScreen extends StatefulWidget {
 
 class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
   String _query = '';
-  late Future<RepoResult<List<ClassRoom>>> _future;
+  late Future<List<ClassRoom>> _future;
 
   @override
   void initState() {
@@ -26,16 +27,20 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
 
   Future<void> _refresh() async {
     final next = AppRepository.instance.fetchClassRooms();
-    await next;
+    try {
+      await next;
+    } catch (_) {
+      // Keep showing the previous list; the indicator just stops spinning.
+    }
     if (mounted) setState(() => _future = next);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RepoResult<List<ClassRoom>>>(
+    return FutureBuilder<List<ClassRoom>>(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           final loading = ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: const [
@@ -46,15 +51,29 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
               SkeletonBox(height: 90, radius: 20),
             ],
           );
-          return widget.embedded ? loading : Scaffold(body: SafeArea(child: loading));
+          if (widget.embedded) return loading;
+          return Scaffold(
+            appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+            body: SafeArea(top: false, child: loading),
+          );
+        }
+        if (snapshot.hasError) {
+          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          if (widget.embedded) return error;
+          return Scaffold(
+            appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+            body: SafeArea(top: false, child: error),
+          );
         }
         return _buildBody(context, snapshot.data!);
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, RepoResult<List<ClassRoom>> result) {
-    final filtered = result.data.where((c) => c.name.toLowerCase().contains(_query.toLowerCase())).toList();
+  void _retry() => setState(() => _future = AppRepository.instance.fetchClassRooms());
+
+  Widget _buildBody(BuildContext context, List<ClassRoom> classRooms) {
+    final filtered = classRooms.where((c) => c.name.toLowerCase().contains(_query.toLowerCase())).toList();
 
     final body = ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -64,8 +83,6 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
         const SizedBox(height: 4),
         Text('Select a class room to view its subjects', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
-        if (result.isDemo) const DemoModeBanner(),
-        const SizedBox(height: 4),
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
@@ -120,6 +137,9 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
     final refreshableBody = RefreshIndicator(onRefresh: _refresh, color: AppColors.primary, child: body);
 
     if (widget.embedded) return refreshableBody;
-    return Scaffold(body: SafeArea(child: refreshableBody));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+      body: SafeArea(top: false, child: refreshableBody),
+    );
   }
 }

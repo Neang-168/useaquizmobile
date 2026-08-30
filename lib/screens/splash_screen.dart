@@ -1,6 +1,10 @@
 ﻿import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../models/models.dart';
+import '../services/session.dart';
+import 'home_screen.dart';
 import 'login_screen.dart';
+import 'teacher_home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,16 +23,26 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 2200), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const LoginScreen(),
-            transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
-            transitionDuration: const Duration(milliseconds: 400),
-          ),
-        );
-      }
+    Future.delayed(const Duration(milliseconds: 2200), () async {
+      // A "Remember me" login persists the token/role to disk (see
+      // Session.saveToken); if one is there, skip straight past Login into
+      // the right role's home screen instead of forcing a re-login every
+      // time the app is relaunched.
+      final token = await Session.loadToken();
+      final role = await Session.loadRole();
+      if (!mounted) return;
+      final destination = (token == null || token.isEmpty)
+          ? const LoginScreen()
+          : (role == UserRole.teacher.name
+                ? const TeacherHomeScreen()
+                : const HomeScreen());
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => destination,
+          transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      );
     });
   }
 

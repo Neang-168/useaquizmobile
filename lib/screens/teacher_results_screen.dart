@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
+import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
 import 'answer_review_screen.dart';
@@ -16,7 +17,7 @@ class TeacherResultsScreen extends StatefulWidget {
 class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
   String _query = '';
   String _filter = 'All';
-  late Future<RepoResult<List<TeacherResult>>> _future;
+  late Future<List<TeacherResult>> _future;
 
   @override
   void initState() {
@@ -24,12 +25,14 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
     _future = AppRepository.instance.fetchAllResults();
   }
 
+  void _retry() => setState(() => _future = AppRepository.instance.fetchAllResults());
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RepoResult<List<TeacherResult>>>(
+    return FutureBuilder<List<TeacherResult>>(
       future: _future,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState != ConnectionState.done) {
           final loading = ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: const [
@@ -40,7 +43,19 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
               SkeletonBox(height: 84, radius: 20),
             ],
           );
-          return widget.embedded ? loading : Scaffold(body: SafeArea(child: loading));
+          if (widget.embedded) return loading;
+          return Scaffold(
+            appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+            body: SafeArea(top: false, child: loading),
+          );
+        }
+        if (snapshot.hasError) {
+          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          if (widget.embedded) return error;
+          return Scaffold(
+            appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+            body: SafeArea(top: false, child: error),
+          );
         }
         return _buildBody(context, snapshot.data!);
       },
@@ -48,17 +63,17 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
   }
 
   Future<void> _openAnswerReview(BuildContext context, TeacherResult r) async {
-    final res = await AppRepository.instance.fetchAssessment(r.quizId);
+    final assessment = await AppRepository.instance.fetchAssessment(r.quizId);
     if (!context.mounted) return;
     Navigator.of(context).push(fadeRoute(AnswerReviewScreen(
       selections: r.answers,
-      questions: res.data.questions,
+      questions: assessment.questions,
       title: '${r.studentName} · ${r.subjectName}',
     )));
   }
 
-  Widget _buildBody(BuildContext context, RepoResult<List<TeacherResult>> result) {
-    final filtered = result.data.where((r) {
+  Widget _buildBody(BuildContext context, List<TeacherResult> results) {
+    final filtered = results.where((r) {
       final q = _query.toLowerCase();
       final matchesQuery = r.studentName.toLowerCase().contains(q) || r.subjectName.toLowerCase().contains(q);
       final matchesFilter = _filter == 'All' || r.level.label == _filter;
@@ -72,8 +87,6 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
         const SizedBox(height: 4),
         Text('Every student\'s quiz result across all classes', style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
-        if (result.isDemo) const DemoModeBanner(),
-        const SizedBox(height: 4),
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
@@ -161,6 +174,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
     );
 
     if (widget.embedded) return body;
-    return Scaffold(body: SafeArea(child: body));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+      body: SafeArea(top: false, child: body),
+    );
   }
 }

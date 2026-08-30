@@ -24,10 +24,12 @@ IconData iconForSubjectCode(String? code) {
   if (c.contains('web')) return Icons.language_rounded;
   if (c.contains('db') || c.contains('data')) return Icons.storage_rounded;
   if (c.contains('net') || c.contains('sec')) return Icons.hub_rounded;
-  if (c.contains('mob') || c.contains('and') || c.contains('ios'))
+  if (c.contains('mob') || c.contains('and') || c.contains('ios')) {
     return Icons.phone_android_rounded;
-  if (c.contains('se') || c.contains('sw'))
+  }
+  if (c.contains('se') || c.contains('sw')) {
     return Icons.integration_instructions_rounded;
+  }
   return Icons.school_rounded;
 }
 
@@ -731,4 +733,335 @@ class AppNotification {
     isRead: j['isRead'] ?? false,
     createdAt: j['createdAt'] ?? '',
   );
+}
+
+/// `GET /teacher/dashboard` → one `recentQuizzes` row.
+class TeacherQuizSummary {
+  final String id;
+  final String title;
+  final String subject;
+  final String className;
+  final String statusText;
+  final int questionsCount;
+  final int duration;
+  final int submittedCount;
+  final int totalStudents;
+
+  const TeacherQuizSummary({
+    required this.id,
+    required this.title,
+    this.subject = '',
+    this.className = '',
+    this.statusText = '',
+    this.questionsCount = 0,
+    this.duration = 0,
+    this.submittedCount = 0,
+    this.totalStudents = 0,
+  });
+
+  double get submissionRate =>
+      totalStudents > 0 ? submittedCount / totalStudents * 100 : 0;
+
+  factory TeacherQuizSummary.fromJson(Map<String, dynamic> j) =>
+      TeacherQuizSummary(
+        id: '${j['id'] ?? ''}',
+        title: j['title'] ?? '',
+        subject: j['subject'] ?? '',
+        className: j['className'] ?? '',
+        statusText: j['statusText'] ?? '',
+        questionsCount: j['questionsCount'] ?? 0,
+        duration: j['duration'] ?? 0,
+        submittedCount: j['submittedCount'] ?? 0,
+        totalStudents: j['totalStudents'] ?? 0,
+      );
+}
+
+/// `GET /teacher/dashboard` → one `upcomingQuizzes` row.
+class TeacherUpcomingQuiz {
+  final String id;
+  final String title;
+  final String subject;
+  final String className;
+  final String status;
+  final String? startAt; // 'Y-m-d\TH:i', nullable
+  final String? endAt;
+
+  const TeacherUpcomingQuiz({
+    required this.id,
+    required this.title,
+    this.subject = '',
+    this.className = '',
+    this.status = '',
+    this.startAt,
+    this.endAt,
+  });
+
+  factory TeacherUpcomingQuiz.fromJson(Map<String, dynamic> j) =>
+      TeacherUpcomingQuiz(
+        id: '${j['id'] ?? ''}',
+        title: j['title'] ?? '',
+        subject: j['subject'] ?? '',
+        className: j['className'] ?? '',
+        status: j['status'] ?? '',
+        startAt: j['startAt'],
+        endAt: j['endAt'],
+      );
+}
+
+/// `GET /teacher/dashboard` → one `needsAttention` row.
+///
+/// [score] is a raw point sum (`mcq_score + essay_score`) from the backend —
+/// it is NOT a percentage and must never be rendered with a `%` suffix.
+class NeedsAttentionEntry {
+  final String name;
+  final String className;
+  final String subject;
+  final int score;
+
+  const NeedsAttentionEntry({
+    required this.name,
+    this.className = '',
+    this.subject = '',
+    this.score = 0,
+  });
+
+  factory NeedsAttentionEntry.fromJson(Map<String, dynamic> j) =>
+      NeedsAttentionEntry(
+        name: j['name'] ?? '',
+        className: j['className'] ?? '',
+        subject: j['subject'] ?? '',
+        score: (j['score'] as num?)?.toInt() ?? 0,
+      );
+}
+
+/// `GET /teacher/dashboard` response.
+class TeacherDashboardStats {
+  final int classesCount;
+  final int studentsCount;
+  final int activeQuizzesCount;
+  final int pendingEssaysCount;
+  final double averageScore;
+  final List<TeacherQuizSummary> recentQuizzes;
+  final List<NeedsAttentionEntry> needsAttention;
+  final List<TeacherUpcomingQuiz> upcomingQuizzes;
+
+  const TeacherDashboardStats({
+    this.classesCount = 0,
+    this.studentsCount = 0,
+    this.activeQuizzesCount = 0,
+    this.pendingEssaysCount = 0,
+    this.averageScore = 0,
+    this.recentQuizzes = const [],
+    this.needsAttention = const [],
+    this.upcomingQuizzes = const [],
+  });
+
+  factory TeacherDashboardStats.fromJson(
+    Map<String, dynamic> j,
+  ) => TeacherDashboardStats(
+    classesCount: j['classesCount'] ?? 0,
+    studentsCount: j['studentsCount'] ?? 0,
+    activeQuizzesCount: j['activeQuizzesCount'] ?? 0,
+    pendingEssaysCount: j['pendingEssaysCount'] ?? 0,
+    averageScore: (j['averageScore'] as num?)?.toDouble() ?? 0,
+    recentQuizzes: (j['recentQuizzes'] as List? ?? const [])
+        .map((q) => TeacherQuizSummary.fromJson(Map<String, dynamic>.from(q)))
+        .toList(),
+    needsAttention: (j['needsAttention'] as List? ?? const [])
+        .map((n) => NeedsAttentionEntry.fromJson(Map<String, dynamic>.from(n)))
+        .toList(),
+    upcomingQuizzes: (j['upcomingQuizzes'] as List? ?? const [])
+        .map((u) => TeacherUpcomingQuiz.fromJson(Map<String, dynamic>.from(u)))
+        .toList(),
+  );
+}
+
+/// `GET /student/dashboard` → one `announcements` row (teacher feedback).
+class Announcement {
+  final String id;
+  final String message;
+  final String teacherName;
+  final String sentAt; // 'Y-m-d\TH:i:s'
+
+  const Announcement({
+    this.id = '',
+    required this.message,
+    this.teacherName = '',
+    this.sentAt = '',
+  });
+
+  String get time => formatRelativeTime(sentAt);
+
+  factory Announcement.fromJson(Map<String, dynamic> j) => Announcement(
+    id: '${j['id'] ?? ''}',
+    message: j['message'] ?? '',
+    teacherName: j['teacherName'] ?? '',
+    sentAt: j['sentAt'] ?? '',
+  );
+}
+
+/// `GET /student/dashboard` → one `dueSoon`/`recentQuizzes` row.
+class StudentQuizSummary {
+  final String id;
+  final String title;
+  final String subject;
+  final String subjectId;
+  final String classId;
+  final String className;
+  final int duration;
+  final int totalQuestions;
+  final String? startAt; // 'Y-m-d\TH:i', nullable
+  final String? endAt;
+  final bool isUpcoming;
+  final bool isClosed;
+  final bool attemptsExhausted;
+  final int attemptsUsed;
+  final int maxAttempts;
+  final String? publishedAt; // 'Y-m-d\TH:i:s', recentQuizzes only
+
+  const StudentQuizSummary({
+    required this.id,
+    required this.title,
+    this.subject = '',
+    this.subjectId = '',
+    this.classId = '',
+    this.className = '',
+    this.duration = 0,
+    this.totalQuestions = 0,
+    this.startAt,
+    this.endAt,
+    this.isUpcoming = false,
+    this.isClosed = false,
+    this.attemptsExhausted = false,
+    this.attemptsUsed = 0,
+    this.maxAttempts = 1,
+    this.publishedAt,
+  });
+
+  IconData get icon => iconForSubjectCode(subject);
+  Color get color => colorForSeed(subjectId.isNotEmpty ? subjectId : subject);
+
+  factory StudentQuizSummary.fromJson(Map<String, dynamic> j) =>
+      StudentQuizSummary(
+        id: '${j['id'] ?? ''}',
+        title: j['title'] ?? '',
+        subject: j['subject'] ?? '',
+        subjectId: '${j['subjectId'] ?? ''}',
+        classId: '${j['classId'] ?? ''}',
+        className: j['className'] ?? '',
+        duration: j['duration'] ?? 0,
+        totalQuestions: j['totalQuestions'] ?? 0,
+        startAt: j['startAt'],
+        endAt: j['endAt'],
+        isUpcoming: j['isUpcoming'] ?? false,
+        isClosed: j['isClosed'] ?? false,
+        attemptsExhausted: j['attemptsExhausted'] ?? false,
+        attemptsUsed: j['attemptsUsed'] ?? 0,
+        maxAttempts: j['maxAttempts'] ?? 1,
+        publishedAt: j['publishedAt'],
+      );
+}
+
+/// `GET /student/dashboard` response.
+class StudentDashboardStats {
+  final int todoCount;
+  final int completedCount;
+  final double averageScore;
+  final int enrolledSubjectsCount;
+  final List<StudentQuizSummary> dueSoon;
+  final List<StudentQuizSummary> recentQuizzes;
+  final List<Announcement> announcements;
+
+  const StudentDashboardStats({
+    this.todoCount = 0,
+    this.completedCount = 0,
+    this.averageScore = 0,
+    this.enrolledSubjectsCount = 0,
+    this.dueSoon = const [],
+    this.recentQuizzes = const [],
+    this.announcements = const [],
+  });
+
+  factory StudentDashboardStats.fromJson(
+    Map<String, dynamic> j,
+  ) => StudentDashboardStats(
+    todoCount: j['todoCount'] ?? 0,
+    completedCount: j['completedCount'] ?? 0,
+    averageScore: (j['averageScore'] as num?)?.toDouble() ?? 0,
+    enrolledSubjectsCount: j['enrolledSubjectsCount'] ?? 0,
+    dueSoon: (j['dueSoon'] as List? ?? const [])
+        .map((q) => StudentQuizSummary.fromJson(Map<String, dynamic>.from(q)))
+        .toList(),
+    recentQuizzes: (j['recentQuizzes'] as List? ?? const [])
+        .map((q) => StudentQuizSummary.fromJson(Map<String, dynamic>.from(q)))
+        .toList(),
+    announcements: (j['announcements'] as List? ?? const [])
+        .map((a) => Announcement.fromJson(Map<String, dynamic>.from(a)))
+        .toList(),
+  );
+}
+
+/// A single day's-worth entry on the Schedule screen, as returned by
+/// `GET /teacher/calendar` and `GET /student/calendar` — both endpoints
+/// return quizzes overlapping the requested month in this same shape.
+class ScheduleItem {
+  final String id;
+  final String title;
+  final String status;
+  final String subjectName;
+  final String subjectCode;
+  final String className;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String? startAt;
+  final String? endAt;
+  final int totalQuestions;
+  final int totalPoints;
+  final int duration; // minutes
+
+  const ScheduleItem({
+    required this.id,
+    required this.title,
+    required this.status,
+    required this.subjectName,
+    required this.subjectCode,
+    required this.className,
+    required this.startDate,
+    required this.endDate,
+    this.startAt,
+    this.endAt,
+    this.totalQuestions = 0,
+    this.totalPoints = 0,
+    this.duration = 0,
+  });
+
+  /// Whether [day] falls within this item's `[startDate, endDate]` range,
+  /// ignoring time-of-day — used to filter the month's items down to the
+  /// list shown for whichever day is selected on the calendar.
+  bool coversDate(DateTime day) {
+    final d = DateTime(day.year, day.month, day.day);
+    return !d.isBefore(startDate) && !d.isAfter(endDate);
+  }
+
+  factory ScheduleItem.fromJson(Map<String, dynamic> j) {
+    final subject = j['subject'] as Map?;
+    final classroom = j['class'] as Map?;
+    DateTime parseDate(dynamic v) =>
+        DateTime.tryParse('${v ?? ''}') ?? DateTime.now();
+    return ScheduleItem(
+      id: '${j['id']}',
+      title: j['title'] ?? '',
+      status: j['status'] ?? '',
+      subjectName: '${subject?['name'] ?? ''}',
+      subjectCode: '${subject?['code'] ?? ''}',
+      className: '${classroom?['name'] ?? ''}',
+      startDate: parseDate(j['startDate']),
+      endDate: parseDate(j['endDate']),
+      startAt: j['startAt'],
+      endAt: j['endAt'],
+      totalQuestions: j['totalQuestions'] ?? 0,
+      totalPoints: j['totalPoints'] ?? 0,
+      duration: j['duration'] ?? 0,
+    );
+  }
 }

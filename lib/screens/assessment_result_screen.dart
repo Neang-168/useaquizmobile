@@ -9,9 +9,8 @@ import 'home_screen.dart';
 class AssessmentResultScreen extends StatelessWidget {
   final String subjectName;
   final SubmissionResult result;
-  final bool isDemo;
 
-  const AssessmentResultScreen({super.key, required this.subjectName, required this.result, this.isDemo = false});
+  const AssessmentResultScreen({super.key, required this.subjectName, required this.result});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +23,6 @@ class AssessmentResultScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
           children: [
-            if (isDemo) const DemoModeBanner(),
             Center(
               child: Column(
                 children: [
