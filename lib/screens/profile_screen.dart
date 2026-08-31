@@ -4,11 +4,15 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'schedule_screen.dart';
 import 'history_screen.dart';
 import 'notifications_screen.dart';
+import 'settings_screen.dart';
+import 'help_support_screen.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   final bool embedded;
@@ -33,12 +37,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _future = _load();
+    _loadPreferences();
   }
 
   Future<_ProfileData> _load() async {
     final repo = AppRepository.instance;
     final results = await Future.wait([repo.fetchProfile(), repo.fetchStudentDashboard()]);
     return _ProfileData(student: results[0] as Student, stats: results[1] as StudentDashboardStats);
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => _notificationsOn = prefs.getBool('pref_notifications') ?? true);
   }
 
   Future<void> _savePreferences() async {
@@ -103,6 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildBody(BuildContext context, _ProfileData data) {
+    final l = AppLocalizations.of(context);
     final student = data.student;
     final completed = data.stats.completedCount;
     final total = completed + data.stats.todoCount;
@@ -119,47 +131,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.only(bottom: 24),
             children: [
               GaugeStatCard(
-                title: 'Your Learning Progress',
+                title: l.yourLearningProgress,
                 percent: percent,
                 centerLabel: '$completed/$total',
-                doneLabel: 'Completed',
-                remainingLabel: 'To do',
+                doneLabel: l.completedChartLabel,
+                remainingLabel: l.todoChartLabel,
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
                 child: Column(
                   children: [
                     ShortcutGrid(tiles: [
-                      ShortcutTile(icon: Icons.edit_outlined, label: 'Edit Profile', onTap: () => _editProfile(student)),
+                      ShortcutTile(icon: Icons.edit_outlined, label: l.editProfileLabel, onTap: () => _editProfile(student)),
                       ShortcutTile(
                         icon: Icons.calendar_month_outlined,
-                        label: 'Schedule',
+                        label: l.scheduleLabel,
                         onTap: () => Navigator.of(context).push(fadeRoute(const ScheduleScreen())),
                       ),
                       ShortcutTile(
                         icon: Icons.history_rounded,
-                        label: 'History',
+                        label: l.historyLabel,
                         onTap: () => Navigator.of(context).push(fadeRoute(const HistoryScreen())),
                       ),
                       ShortcutTile(
                         icon: Icons.notifications_outlined,
-                        label: 'Notifications',
+                        label: l.notificationsLabel,
                         onTap: () => Navigator.of(context).push(fadeRoute(const NotificationsScreen())),
                       ),
                     ]),
                     const SizedBox(height: 22),
 
                     ProfileDetailsCard(rows: [
-                      (icon: Icons.email_outlined, label: 'Email', value: student.email),
-                      (icon: Icons.book_outlined, label: 'Major', value: student.major ?? '—'),
-                      (icon: Icons.meeting_room_outlined, label: 'Class', value: student.className ?? '—'),
-                      (icon: Icons.calendar_month_outlined, label: 'Academic Year', value: student.academicYear ?? '—'),
+                      (icon: Icons.email_outlined, label: l.emailLabel, value: student.email),
+                      (icon: Icons.book_outlined, label: l.majorLabel, value: student.major ?? '—'),
+                      (icon: Icons.meeting_room_outlined, label: l.classLabel, value: student.className ?? '—'),
+                      (icon: Icons.calendar_month_outlined, label: l.academicYearLabel, value: student.academicYear ?? '—'),
                     ]),
                     const SizedBox(height: 22),
 
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('Preferences', style: Theme.of(context).textTheme.titleLarge),
+                      child: Text(l.preferencesTitle, style: Theme.of(context).textTheme.titleLarge),
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -168,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           SettingsSwitchTile(
                             icon: Icons.notifications_outlined,
-                            label: 'Notifications',
+                            label: l.notificationsLabel,
                             value: _notificationsOn,
                             onChanged: (v) {
                               setState(() => _notificationsOn = v);
@@ -180,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             valueListenable: ThemeController.isDark,
                             builder: (context, isDark, _) => SettingsSwitchTile(
                               icon: Icons.dark_mode_outlined,
-                              label: 'Dark Mode',
+                              label: l.darkModeLabel,
                               value: isDark,
                               onChanged: (v) {
                                 ThemeController.setDark(v);
@@ -189,9 +201,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const Divider(height: 1, indent: 60),
-                          const SettingsNavTile(icon: Icons.settings_outlined, label: 'Settings'),
+                          SettingsNavTile(
+                            icon: Icons.settings_outlined,
+                            label: l.settingsNav,
+                            onTap: () => Navigator.of(context).push(fadeRoute(const SettingsScreen())),
+                          ),
                           const Divider(height: 1, indent: 60),
-                          const SettingsNavTile(icon: Icons.help_outline_rounded, label: 'Help & Support'),
+                          SettingsNavTile(
+                            icon: Icons.help_outline_rounded,
+                            label: l.helpSupportNav,
+                            onTap: () => Navigator.of(context).push(fadeRoute(const HelpSupportScreen())),
+                          ),
                         ],
                       ),
                     ),

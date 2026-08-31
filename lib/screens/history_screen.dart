@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class HistoryScreen extends StatefulWidget {
   final bool embedded;
@@ -15,7 +16,9 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   String _query = '';
-  String _filter = 'All';
+  // null means "All" — kept locale-independent since PerformanceLevel.label
+  // is a translated display string, not a stable identifier to filter by.
+  PerformanceLevel? _filter;
   late Future<List<HistoryItem>> _future;
 
   @override
@@ -44,7 +47,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           );
           if (widget.embedded) return loading;
           return Scaffold(
-            appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).historyAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: loading),
           );
         }
@@ -52,7 +55,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
           if (widget.embedded) return error;
           return Scaffold(
-            appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).historyAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: error),
           );
         }
@@ -62,24 +65,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildBody(BuildContext context, List<HistoryItem> history) {
+    final l = AppLocalizations.of(context);
     final filtered = history.where((h) {
       final q = _query.toLowerCase();
       final matchesQuery = h.subject.toLowerCase().contains(q) || h.quizTitle.toLowerCase().contains(q);
-      final matchesFilter = _filter == 'All' || h.level.label == _filter;
+      final matchesFilter = _filter == null || h.level == _filter;
       return matchesQuery && matchesFilter;
     }).toList();
 
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text('Assessment History', style: Theme.of(context).textTheme.headlineMedium),
+        Text(l.assessmentHistoryTitle, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        Text('Track all your completed pre-study assessments', style: Theme.of(context).textTheme.bodyMedium),
+        Text(l.trackHistorySubtitle, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
         TextField(
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
-            hintText: 'Search by subject...',
+            hintText: l.searchBySubjectHint,
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
         ),
@@ -88,12 +92,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
           height: 36,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: ['All', 'Excellent', 'Good', 'Average', 'Beginner'].map((f) {
+            children: [null, ...PerformanceLevel.values].map((f) {
               final selected = _filter == f;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(f),
+                  label: Text(f?.label ?? l.allFilter),
                   selected: selected,
                   onSelected: (_) => setState(() => _filter = f),
                   selectedColor: AppColors.primary,
@@ -109,10 +113,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         const SizedBox(height: 18),
         if (filtered.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.history_toggle_off_rounded,
-            title: 'No history found',
-            subtitle: 'Completed assessments will show up here.',
+            title: l.noHistoryFound,
+            subtitle: l.noHistoryFoundSubtitle,
           )
         else
           ...filtered.map((h) => Padding(
@@ -157,7 +161,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (widget.embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('History'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.historyAppBarTitle), leading: const BackButton()),
       body: SafeArea(top: false, child: body),
     );
   }

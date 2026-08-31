@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'subjects_screen.dart';
 
 class ClassRoomsScreen extends StatefulWidget {
@@ -53,7 +54,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
           );
           if (widget.embedded) return loading;
           return Scaffold(
-            appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).classesAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: loading),
           );
         }
@@ -61,7 +62,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
           final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
           if (widget.embedded) return error;
           return Scaffold(
-            appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).classesAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: error),
           );
         }
@@ -73,31 +74,32 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
   void _retry() => setState(() => _future = AppRepository.instance.fetchClassRooms());
 
   Widget _buildBody(BuildContext context, List<ClassRoom> classRooms) {
+    final l = AppLocalizations.of(context);
     final filtered = classRooms.where((c) => c.name.toLowerCase().contains(_query.toLowerCase())).toList();
 
     final body = ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text('My Class Rooms', style: Theme.of(context).textTheme.headlineMedium),
+        Text(l.myClassRoomsTitle, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        Text('Select a class room to view its subjects', style: Theme.of(context).textTheme.bodyMedium),
+        Text(l.selectClassRoomSubtitle, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
-            hintText: 'Search class rooms...',
+            hintText: l.searchClassRoomsHint,
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
         ),
         const SizedBox(height: 18),
 
         if (filtered.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.search_off_rounded,
-            title: 'No class rooms found',
-            subtitle: 'Try a different search term.',
+            title: l.noClassRoomsFound,
+            subtitle: l.tryDifferentSearchTerm,
           )
         else
           ...filtered.map((c) => Padding(
@@ -121,7 +123,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
                             children: [
                               Text(c.name, style: Theme.of(context).textTheme.titleMedium),
                               const SizedBox(height: 4),
-                              Text('${c.totalSubjects} subject${c.totalSubjects == 1 ? '' : 's'}', style: Theme.of(context).textTheme.bodyMedium),
+                              Text(l.subjectCount(c.totalSubjects), style: Theme.of(context).textTheme.bodyMedium),
                             ],
                           ),
                         ),
@@ -138,7 +140,7 @@ class _ClassRoomsScreenState extends State<ClassRoomsScreen> {
 
     if (widget.embedded) return refreshableBody;
     return Scaffold(
-      appBar: AppBar(title: const Text('Classes'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.classesAppBarTitle), leading: const BackButton()),
       body: SafeArea(top: false, child: refreshableBody),
     );
   }

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/generated/app_localizations.dart';
+
+/// Model-layer code has no [BuildContext] to call `AppLocalizations.of`, so
+/// it looks the current translation up directly from [LocaleController]'s
+/// locale instead — same live-updating source the widget tree itself reads.
+AppLocalizations get _l => lookupAppLocalizations(LocaleController.locale.value);
 
 /// The live API never sends icon/color strings for any entity — these are
 /// derived client-side from stable identifiers (subject code, notification
@@ -64,6 +70,21 @@ const _months = [
   'Dec',
 ];
 
+const _monthsKm = [
+  'មករា',
+  'កុម្ភៈ',
+  'មីនា',
+  'មេសា',
+  'ឧសភា',
+  'មិថុនា',
+  'កក្កដា',
+  'សីហា',
+  'កញ្ញា',
+  'តុលា',
+  'វិច្ឆិកា',
+  'ធ្នូ',
+];
+
 /// Formats an ISO-ish date string (as returned by Laravel, e.g.
 /// `2026-07-21T09:00` or `2026-07-21T09:00:00`) into a human date, matching
 /// the display style the UI already used for its literal mock dates.
@@ -71,7 +92,8 @@ String formatDisplayDate(String? iso, {bool withTime = false}) {
   if (iso == null || iso.isEmpty) return '';
   final dt = DateTime.tryParse(iso);
   if (dt == null) return iso;
-  final date = '${_months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  final months = LocaleController.locale.value.languageCode == 'km' ? _monthsKm : _months;
+  final date = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   if (!withTime) return date;
   final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
   final m = dt.minute.toString().padLeft(2, '0');
@@ -86,11 +108,12 @@ String formatRelativeTime(String? iso) {
   final dt = DateTime.tryParse(iso);
   if (dt == null) return iso;
   final diff = DateTime.now().difference(dt);
-  if (diff.inMinutes < 1) return 'Just now';
-  if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-  if (diff.inHours < 24) return '${diff.inHours}h ago';
-  if (diff.inDays < 2) return 'Yesterday';
-  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  final l = _l;
+  if (diff.inMinutes < 1) return l.justNow;
+  if (diff.inMinutes < 60) return l.minutesAgo(diff.inMinutes);
+  if (diff.inHours < 24) return l.hoursAgo(diff.inHours);
+  if (diff.inDays < 2) return l.yesterday;
+  if (diff.inDays < 7) return l.daysAgo(diff.inDays);
   return formatDisplayDate(iso);
 }
 
@@ -98,10 +121,10 @@ enum PerformanceLevel { excellent, good, average, beginner }
 
 extension PerformanceLevelX on PerformanceLevel {
   String get label => switch (this) {
-    PerformanceLevel.excellent => 'Excellent',
-    PerformanceLevel.good => 'Good',
-    PerformanceLevel.average => 'Average',
-    PerformanceLevel.beginner => 'Beginner',
+    PerformanceLevel.excellent => _l.excellentLevel,
+    PerformanceLevel.good => _l.goodLevel,
+    PerformanceLevel.average => _l.averageLevel,
+    PerformanceLevel.beginner => _l.beginnerLevel,
   };
 
   Color get color => switch (this) {

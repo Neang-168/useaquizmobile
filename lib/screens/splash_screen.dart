@@ -2,6 +2,7 @@
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/session.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 import 'teacher_home_screen.dart';
@@ -54,6 +55,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.heroGradient),
@@ -77,8 +79,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: const Icon(Icons.school_rounded, color: Colors.white, size: 36),
                   ),
                   const SizedBox(height: 14),
-                  const Text('University of Southeast Asia',
-                      style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                  Text(l.splashUniversityName,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
                   const Spacer(flex: 1),
                   // App logo
                   Container(
@@ -92,12 +94,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: const Icon(Icons.fact_check_rounded, color: AppColors.primary, size: 54),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Pre-Study IT\nKnowledge Assessment',
+                  Text(l.splashAppTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700, height: 1.3)),
+                      style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700, height: 1.3)),
                   const SizedBox(height: 10),
-                  const Text('Know where you stand before class begins',
-                      style: TextStyle(color: Colors.white70, fontSize: 13.5)),
+                  Text(l.splashTagline,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13.5)),
                   const Spacer(flex: 2),
                   const SizedBox(
                     width: 28,

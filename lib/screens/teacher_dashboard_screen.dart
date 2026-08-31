@@ -5,6 +5,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'schedule_screen.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
@@ -21,11 +22,11 @@ class _DashboardData {
   const _DashboardData({required this.teacherName, required this.stats});
 }
 
-String _greeting() {
+String _greeting(AppLocalizations l) {
   final h = DateTime.now().hour;
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 12) return l.goodMorning;
+  if (h < 17) return l.goodAfternoon;
+  return l.goodEvening;
 }
 
 String _initials(String name) {
@@ -105,6 +106,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   }
 
   Widget _buildBody(BuildContext context, _DashboardData data) {
+    final l = AppLocalizations.of(context);
     final stats = data.stats;
     return RefreshIndicator(
       onRefresh: _refresh,
@@ -136,7 +138,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_greeting(), style: Theme.of(context).textTheme.bodyMedium),
+                    Text(_greeting(l), style: Theme.of(context).textTheme.bodyMedium),
                     Text(data.teacherName, style: Theme.of(context).textTheme.titleLarge),
                   ],
                 ),
@@ -175,18 +177,18 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: _HeroStat(icon: Icons.meeting_room_rounded, value: '${stats.classesCount}', label: 'Classes'),
+                  child: _HeroStat(icon: Icons.meeting_room_rounded, value: '${stats.classesCount}', label: l.classesCountLabel),
                 ),
                 _heroDivider(),
                 Expanded(
-                  child: _HeroStat(icon: Icons.groups_rounded, value: '${stats.studentsCount}', label: 'Students'),
+                  child: _HeroStat(icon: Icons.groups_rounded, value: '${stats.studentsCount}', label: l.studentsLabel),
                 ),
                 _heroDivider(),
                 Expanded(
                   child: _HeroStat(
                     icon: Icons.fact_check_rounded,
                     value: '${stats.activeQuizzesCount}',
-                    label: 'Active Quizzes',
+                    label: l.activeQuizzesLabel,
                   ),
                 ),
               ],
@@ -203,7 +205,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 Expanded(
                   child: _StatCard(
                     icon: Icons.edit_note_rounded,
-                    label: 'Pending Essays',
+                    label: l.pendingEssaysLabel,
                     value: '${stats.pendingEssaysCount}',
                     color: AppColors.warning,
                   ),
@@ -212,7 +214,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 Expanded(
                   child: _StatCard(
                     icon: Icons.emoji_events_rounded,
-                    label: 'Average Score',
+                    label: l.averageScoreLabel,
                     value: '${stats.averageScore.toStringAsFixed(1)}%',
                     color: AppColors.success,
                   ),
@@ -222,13 +224,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
           const SizedBox(height: 28),
 
-          SectionHeader(title: 'Submission Rates'),
+          SectionHeader(title: l.submissionRatesTitle),
           const SizedBox(height: 12),
           if (stats.recentQuizzes.isEmpty)
-            const EmptyState(
+            EmptyState(
               icon: Icons.bar_chart_rounded,
-              title: 'No recent quizzes',
-              subtitle: 'Submission rates will appear here once quizzes are published.',
+              title: l.noRecentQuizzes,
+              subtitle: l.noRecentQuizzesSubmissionSubtitle,
             )
           else
             Container(
@@ -239,13 +241,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ),
           const SizedBox(height: 26),
 
-          SectionHeader(title: 'Recent Quizzes'),
+          SectionHeader(title: l.recentQuizzesTitle),
           const SizedBox(height: 12),
           if (stats.recentQuizzes.isEmpty)
-            const EmptyState(
+            EmptyState(
               icon: Icons.quiz_outlined,
-              title: 'No recent quizzes',
-              subtitle: 'Quizzes you publish will show up here.',
+              title: l.noRecentQuizzes,
+              subtitle: l.noRecentQuizzesSubtitle,
             )
           else
             ...stats.recentQuizzes.map(
@@ -253,7 +255,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 icon: Icons.quiz_rounded,
                 iconColor: colorForSeed(q.id),
                 title: q.title,
-                subtitleLines: ['${q.subject} · ${q.className}', '${q.submittedCount}/${q.totalStudents} submitted'],
+                subtitleLines: ['${q.subject} · ${q.className}', l.submittedCount(q.submittedCount, q.totalStudents)],
                 trailing: StatusPill(
                   label: q.statusText,
                   color: q.statusText == 'Published' ? AppColors.success : AppColors.textMuted,
@@ -262,17 +264,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             ),
           const SizedBox(height: 26),
 
-          SectionHeader(title: 'Needs Attention'),
+          SectionHeader(title: l.needsAttentionTitle),
           const SizedBox(height: 6),
           if (stats.needsAttention.isNotEmpty) ...[
-            Text('Raw point totals — not percentages', style: Theme.of(context).textTheme.bodyMedium),
+            Text(l.rawPointTotalsNote, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 8),
           ],
           if (stats.needsAttention.isEmpty)
-            const EmptyState(
+            EmptyState(
               icon: Icons.check_circle_outline_rounded,
-              title: 'No students currently flagged',
-              subtitle: 'Students scoring below the pass mark will appear here.',
+              title: l.noStudentsFlagged,
+              subtitle: l.noStudentsFlaggedSubtitle,
             )
           else
             ...stats.needsAttention.map(
@@ -281,19 +283,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 iconColor: AppColors.danger,
                 title: e.name,
                 subtitleLines: ['${e.subject} · ${e.className}'],
-                trailing: StatusPill(label: '${e.score} pts', color: AppColors.danger),
+                trailing: StatusPill(label: l.ptsLabel(e.score), color: AppColors.danger),
                 flagged: true,
               ),
             ),
           const SizedBox(height: 26),
 
-          SectionHeader(title: 'Upcoming Quizzes'),
+          SectionHeader(title: l.upcomingQuizzesTitle),
           const SizedBox(height: 12),
           if (stats.upcomingQuizzes.isEmpty)
-            const EmptyState(
+            EmptyState(
               icon: Icons.event_available_outlined,
-              title: 'Nothing scheduled',
-              subtitle: 'Upcoming quizzes will appear here.',
+              title: l.nothingScheduled,
+              subtitle: l.nothingScheduledSubtitle,
             )
           else
             ...stats.upcomingQuizzes.map(
@@ -303,7 +305,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 title: u.title,
                 subtitleLines: [
                   '${u.subject} · ${u.className}',
-                  u.endAt == null ? 'No schedule set' : 'Due ${formatDisplayDate(u.endAt, withTime: true)}',
+                  u.endAt == null ? l.noScheduleSet : l.dueDatePrefix(formatDisplayDate(u.endAt, withTime: true)),
                 ],
               ),
             ),

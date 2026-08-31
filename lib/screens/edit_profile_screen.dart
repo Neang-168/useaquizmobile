@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../services/app_repository.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Student student;
@@ -40,7 +41,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Couldn\'t save changes: $e'), backgroundColor: AppColors.danger),
+        SnackBar(content: Text(AppLocalizations.of(context).couldntSaveChanges('$e')), backgroundColor: AppColors.danger),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -49,8 +50,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.editProfileTitle), leading: const BackButton()),
       body: SafeArea(
         top: false,
         child: Form(
@@ -58,45 +60,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              Text('Your details', style: Theme.of(context).textTheme.titleLarge),
+              Text(l.yourDetails, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 4),
-              Text('Faculty, major, and academic year are set by the university and can\'t be changed here.',
+              Text(l.facultyNote,
                   style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 20),
-              Text('First Name', style: Theme.of(context).textTheme.titleMedium),
+              Text(l.firstName, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _firstNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Your first name',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
+                decoration: InputDecoration(
+                  hintText: l.firstNameHint,
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'First name is required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? l.firstNameRequired : null,
               ),
               const SizedBox(height: 18),
-              Text('Last Name', style: Theme.of(context).textTheme.titleMedium),
+              Text(l.lastName, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _lastNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Your last name',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
+                decoration: InputDecoration(
+                  hintText: l.lastNameHint,
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Last name is required' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? l.lastNameRequired : null,
               ),
               const SizedBox(height: 18),
-              Text('Email', style: Theme.of(context).textTheme.titleMedium),
+              Text(l.emailLabel, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: 'you@usea.edu.kh',
-                  prefixIcon: Icon(Icons.email_outlined),
+                decoration: InputDecoration(
+                  hintText: l.emailHint,
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Email is required';
-                  if (!v.contains('@') || !v.contains('.')) return 'Enter a valid email';
+                  if (v == null || v.trim().isEmpty) return l.emailRequired;
+                  if (!v.contains('@') || !v.contains('.')) return l.emailInvalid;
                   return null;
                 },
               ),
@@ -105,7 +107,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onPressed: _saving ? null : _save,
                 child: _saving
                     ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                    : const Text('Save Changes'),
+                    : Text(l.saveChanges),
               ),
             ],
           ),

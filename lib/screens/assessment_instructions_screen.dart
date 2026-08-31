@@ -2,6 +2,7 @@
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'quiz_screen.dart';
 
 class AssessmentInstructionsScreen extends StatelessWidget {
@@ -11,16 +12,17 @@ class AssessmentInstructionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final a = assessment;
+    final l = AppLocalizations.of(context);
     final rules = [
-      (icon: Icons.timer_outlined, text: 'You have ${a.duration} minutes to complete ${a.totalQuestions} questions.'),
-      (icon: Icons.pause_circle_outline_rounded, text: 'The timer cannot be paused once the assessment starts.'),
-      (icon: Icons.flag_outlined, text: 'You may flag questions and revisit them before submitting.'),
-      (icon: Icons.check_circle_outline_rounded, text: 'A passing score is not required — this is a diagnostic quiz.'),
-      (icon: Icons.shield_outlined, text: 'Answer independently. This assessment is covered by the academic honesty policy.'),
+      (icon: Icons.timer_outlined, text: l.ruleTimer(a.duration, a.totalQuestions)),
+      (icon: Icons.pause_circle_outline_rounded, text: l.ruleNoPause),
+      (icon: Icons.flag_outlined, text: l.ruleFlag),
+      (icon: Icons.check_circle_outline_rounded, text: l.ruleNoPassingScore),
+      (icon: Icons.shield_outlined, text: l.ruleHonesty),
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Instructions'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.instructionsAppBarTitle), leading: const BackButton()),
       body: SafeArea(
         top: false,
         child: Column(
@@ -39,12 +41,12 @@ class AssessmentInstructionsScreen extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(a.subject, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 4),
-                        Text('Read the instructions carefully before you begin', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
+                        Text(l.readCarefullySubtitle, style: TextStyle(color: AppColors.textSecondary, fontSize: 12.5)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 22),
-                  Text('Before you start', style: Theme.of(context).textTheme.titleLarge),
+                  Text(l.beforeYouStart, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 12),
                   ...rules.map((r) => Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -70,7 +72,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'By starting, you confirm this work is entirely your own, in line with the university\'s Academic Honesty Policy.',
+                            l.honestyWarning,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: const Color(0xFF92400E)),
                           ),
                         ),
@@ -84,7 +86,7 @@ class AssessmentInstructionsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).push(fadeRoute(QuizScreen(assessment: a))),
-                child: const Text('I Understand, Start Now'),
+                child: Text(l.startNowButton),
               ),
             ),
           ],

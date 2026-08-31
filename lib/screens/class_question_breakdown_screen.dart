@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Per-question right/wrong breakdown for a subject's quizzes. The live
 /// `/teacher/quizzes/{id}/scores` endpoint only returns aggregate mcq/essay
@@ -13,17 +14,17 @@ class ClassQuestionBreakdownScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(subjectName), leading: const BackButton()),
-      body: const SafeArea(
+      body: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 24, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
           child: EmptyState(
             icon: Icons.info_outline_rounded,
-            title: 'Per-question breakdown unavailable',
-            subtitle:
-                'The API only returns each student\'s overall score, not their answer to every question, so this view can\'t be built from live data.',
+            title: l.perQuestionUnavailable,
+            subtitle: l.perQuestionUnavailableSubtitle,
           ),
         ),
       ),

@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../widgets/common_widgets.dart';
 import '../services/app_repository.dart';
 import '../services/api_client.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'home_screen.dart';
 import 'teacher_home_screen.dart';
 
@@ -94,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: _Brand.pageBg,
       body: SafeArea(
@@ -116,16 +118,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Image.asset('assets/usealogo.jpg', fit: BoxFit.contain),
               ),
               const SizedBox(height: 18),
-              const Text(
-                'UNIVERSIT OF SOUTH-EAST ASIA',
+              Text(
+                l.loginUniversityName,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: _Brand.textDark, height: 1.3),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: _Brand.textDark, height: 1.3),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Welcome back! Sign in to continue your pre-study assessments.",
+              Text(
+                l.loginWelcome,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: _Brand.secondary, height: 1.4),
+                style: const TextStyle(fontSize: 13, color: _Brand.secondary, height: 1.4),
               ),
               const SizedBox(height: 16),
               Row(
@@ -154,15 +156,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _Brand.textDark)),
+                    Text(l.loginTitle, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _Brand.textDark)),
                     const SizedBox(height: 22),
 
-                    _fieldLabel('Student ID'),
+                    _fieldLabel(l.loginStudentId),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _idController,
                       decoration: _fieldDecoration(
-                        hint: 'ITU2023-0142',
+                        hint: l.loginStudentIdHint,
                         prefixIcon: const Icon(Icons.badge_outlined, color: _Brand.muted, size: 20),
                       ),
                     ),
@@ -171,11 +173,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _fieldLabel('Password'),
+                        _fieldLabel(l.loginPassword),
                         GestureDetector(
                           onTap: () {},
-                          child: const Text('Forgot password?',
-                              style: TextStyle(color: _Brand.indigo, fontWeight: FontWeight.w600, fontSize: 12.5)),
+                          child: Text(l.loginForgotPassword,
+                              style: const TextStyle(color: _Brand.indigo, fontWeight: FontWeight.w600, fontSize: 12.5)),
                         ),
                       ],
                     ),
@@ -184,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _passwordController,
                       obscureText: _obscure,
                       decoration: _fieldDecoration(
-                        hint: 'Enter your password',
+                        hint: l.loginPasswordHint,
                         prefixIcon: const Icon(Icons.lock_outline_rounded, color: _Brand.muted, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -208,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text('Remember me', style: TextStyle(fontSize: 13, color: _Brand.secondary)),
+                        Text(l.loginRememberMe, style: const TextStyle(fontSize: 13, color: _Brand.secondary)),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -228,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: _loading
                             ? const SizedBox(
                                 width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                            : const Text('Login'),
+                            : Text(l.loginButton),
                       ),
                     ),
                   ],

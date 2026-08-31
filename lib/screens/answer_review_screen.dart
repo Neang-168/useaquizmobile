@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Demo-mode only: the live API never returns per-question correctness, so
 /// this screen is only ever pushed when [AppRepository]'s local scorer
@@ -11,8 +12,8 @@ import '../widgets/common_widgets.dart';
 class AnswerReviewScreen extends StatefulWidget {
   final List<Question> questions;
   final List<String?> selections; // selected option id per questions[i]
-  final String title;
-  const AnswerReviewScreen({super.key, required this.questions, required this.selections, this.title = 'Answer Review'});
+  final String? title;
+  const AnswerReviewScreen({super.key, required this.questions, required this.selections, this.title});
 
   @override
   State<AnswerReviewScreen> createState() => _AnswerReviewScreenState();
@@ -23,13 +24,14 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final q = widget.questions[_current];
     final selected = _current < widget.selections.length ? widget.selections[_current] : null;
     final correctIds = q.options.where((o) => o.isCorrect).map((o) => o.id).toSet();
     final isCorrect = !q.isMatching && selected != null && correctIds.contains(selected);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title), leading: const BackButton()),
+      appBar: AppBar(title: Text(widget.title ?? l.answerReviewTitle), leading: const BackButton()),
       body: SafeArea(
         top: false,
         child: Column(
@@ -41,11 +43,11 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Question ${_current + 1} of ${widget.questions.length}',
+                      Text(l.questionOfTotal(_current + 1, widget.questions.length),
                           style: TextStyle(color: AppColors.textMuted, fontSize: 12.5, fontWeight: FontWeight.w600)),
                       if (!q.isMatching)
                         StatusPill(
-                          label: isCorrect ? 'Correct' : (selected == null ? 'Unanswered' : 'Incorrect'),
+                          label: isCorrect ? l.correct : (selected == null ? l.unanswered : l.incorrect),
                           color: isCorrect ? AppColors.success : (selected == null ? AppColors.textMuted : AppColors.danger),
                         ),
                     ],
@@ -66,7 +68,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                         children: [
                           const Icon(Icons.info_outline_rounded, color: AppColors.primary),
                           const SizedBox(width: 12),
-                          const Expanded(child: Text('Matching-question review isn\'t shown in this simplified demo view.')),
+                          Expanded(child: Text(l.matchingReviewUnavailable)),
                         ],
                       ),
                     )
@@ -124,7 +126,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _current == 0 ? null : () => setState(() => _current--),
                       icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                      label: const Text('Previous'),
+                      label: Text(l.previous),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -132,7 +134,7 @@ class _AnswerReviewScreenState extends State<AnswerReviewScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _current == widget.questions.length - 1 ? null : () => setState(() => _current++),
                       icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                      label: const Text('Next'),
+                      label: Text(l.next),
                     ),
                   ),
                 ],

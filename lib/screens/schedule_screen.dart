@@ -4,6 +4,7 @@ import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Month calendar + a list of what's scheduled on the selected day. Shared
 /// by both roles — [AppRepository.fetchSchedule] internally picks
@@ -51,8 +52,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Schedule')),
+      appBar: AppBar(title: Text(l.scheduleAppBarTitle)),
       body: SafeArea(
         child: FutureBuilder<List<ScheduleItem>>(
           future: _future,
@@ -90,9 +92,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   ),
                 ),
                 const SizedBox(height: 26),
-                const SectionHeader(title: 'Schedule'),
+                SectionHeader(title: l.scheduleSectionTitle),
                 const SizedBox(height: 12),
-                ..._scheduleList(items),
+                ..._scheduleList(context, items),
               ],
             );
           },
@@ -101,14 +103,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  List<Widget> _scheduleList(List<ScheduleItem> items) {
+  List<Widget> _scheduleList(BuildContext context, List<ScheduleItem> items) {
+    final l = AppLocalizations.of(context);
     final dayItems = items.where((i) => i.coversDate(_selectedDay)).toList();
     if (dayItems.isEmpty) {
-      return const [
+      return [
         EmptyState(
           icon: Icons.event_busy_outlined,
-          title: 'No Data',
-          subtitle: 'Nothing scheduled for this day.',
+          title: l.noDataTitle,
+          subtitle: l.noDataSubtitle,
         ),
       ];
     }
@@ -197,6 +200,7 @@ class _CalendarGrid extends StatelessWidget {
   });
 
   static const _weekdayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  static const _weekdayLabelsKm = ['អា', 'ច', 'អ', 'ព', 'ព្រ', 'សុ', 'ស'];
   static const _monthNames = [
     'January',
     'February',
@@ -211,12 +215,29 @@ class _CalendarGrid extends StatelessWidget {
     'November',
     'December',
   ];
+  static const _monthNamesKm = [
+    'មករា',
+    'កុម្ភៈ',
+    'មីនា',
+    'មេសា',
+    'ឧសភា',
+    'មិថុនា',
+    'កក្កដា',
+    'សីហា',
+    'កញ្ញា',
+    'តុលា',
+    'វិច្ឆិកា',
+    'ធ្នូ',
+  ];
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
+    final isKhmer = Localizations.localeOf(context).languageCode == 'km';
+    final weekdayLabels = isKhmer ? _weekdayLabelsKm : _weekdayLabels;
+    final monthNames = isKhmer ? _monthNamesKm : _monthNames;
     final firstOfMonth = DateTime(
       displayedMonth.year,
       displayedMonth.month,
@@ -246,7 +267,7 @@ class _CalendarGrid extends StatelessWidget {
               onPressed: onPrevMonth,
             ),
             Text(
-              '${_monthNames[displayedMonth.month - 1]} ${displayedMonth.year}',
+              '${monthNames[displayedMonth.month - 1]} ${displayedMonth.year}',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             IconButton(
@@ -258,7 +279,7 @@ class _CalendarGrid extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Row(
-          children: _weekdayLabels
+          children: weekdayLabels
               .map(
                 (l) => Expanded(
                   child: Center(

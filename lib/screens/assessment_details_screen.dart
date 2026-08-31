@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'assessment_instructions_screen.dart';
 
 class AssessmentDetailsScreen extends StatefulWidget {
@@ -25,8 +26,9 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Assessment Details'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.assessmentDetailsTitle), leading: const BackButton()),
       body: SafeArea(
         top: false,
         child: FutureBuilder<Assessment>(
@@ -75,7 +77,7 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Pre-Study Assessment', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                  Text(l.preStudyAssessmentLabel, style: const TextStyle(color: Colors.white70, fontSize: 12)),
                                   const SizedBox(height: 4),
                                   Text(a.subject,
                                       style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
@@ -91,27 +93,28 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                         decoration: softCardDecoration(),
                         child: Column(
                           children: [
-                            _infoRow(context, Icons.meeting_room_outlined, 'Class', a.className),
+                            _infoRow(context, Icons.meeting_room_outlined, l.classLabel, a.className),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.quiz_outlined, 'Total Questions', '${a.totalQuestions} questions'),
+                            _infoRow(context, Icons.quiz_outlined, l.totalQuestionsLabel, l.totalQuestionsValue(a.totalQuestions)),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.timer_outlined, 'Time Limit', '${a.duration} minutes'),
+                            _infoRow(context, Icons.timer_outlined, l.timeLimitLabel, l.minutesValue(a.duration)),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.military_tech_outlined, 'Total Points / Pass Mark', '${a.totalPoints} pts · ${a.passMark}%'),
+                            _infoRow(context, Icons.military_tech_outlined, l.totalPointsPassMarkLabel,
+                                l.pointsPassMarkValue(a.totalPoints, a.passMark)),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.replay_rounded, 'Attempts', '${a.attemptsUsed}/${a.maxAttempts} used'),
+                            _infoRow(context, Icons.replay_rounded, l.attemptsLabel, l.attemptsValue(a.attemptsUsed, a.maxAttempts)),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.event_available_outlined, 'Available From',
-                                a.startAt == null ? 'Anytime' : formatDisplayDate(a.startAt, withTime: true)),
+                            _infoRow(context, Icons.event_available_outlined, l.availableFromLabel,
+                                a.startAt == null ? l.anytimeLabel : formatDisplayDate(a.startAt, withTime: true)),
                             const Divider(height: 24),
-                            _infoRow(context, Icons.event_busy_outlined, 'Due Date',
-                                a.endAt == null ? 'No deadline' : formatDisplayDate(a.endAt, withTime: true)),
+                            _infoRow(context, Icons.event_busy_outlined, l.dueDateLabel,
+                                a.endAt == null ? l.noDeadlineLabel : formatDisplayDate(a.endAt, withTime: true)),
                           ],
                         ),
                       ),
                       if (a.description.isNotEmpty) ...[
                         const SizedBox(height: 20),
-                        Text('About This Quiz', style: Theme.of(context).textTheme.titleLarge),
+                        Text(l.aboutThisQuiz, style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 10),
                         Container(
                           padding: const EdgeInsets.all(16),
@@ -120,7 +123,7 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                         ),
                       ],
                       const SizedBox(height: 20),
-                      Text('Instructions', style: Theme.of(context).textTheme.titleLarge),
+                      Text(l.instructionsTitle, style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -132,7 +135,7 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'This assessment measures your prior knowledge. It will not affect your final grade — answer honestly.',
+                                l.honestyNotice,
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
@@ -149,10 +152,10 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                         ? null
                         : () => Navigator.of(context).push(fadeRoute(AssessmentInstructionsScreen(assessment: a))),
                     child: Text(a.attemptsExhausted
-                        ? 'Attempts Used Up'
+                        ? l.attemptsUsedUp
                         : a.isClosed
-                            ? 'Assessment Closed'
-                            : 'Start Assessment'),
+                            ? l.assessmentClosed
+                            : l.startAssessment),
                   ),
                 ),
               ],

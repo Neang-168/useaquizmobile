@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
 import 'widgets/common_widgets.dart';
+import 'l10n/generated/app_localizations.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   ThemeController.load();
+  LocaleController.load();
   // Whenever a request comes back 401 (expired/invalid token), bounce back
   // to the login screen from wherever the user currently is.
   ApiClient.onUnauthorized = () {
@@ -24,12 +27,23 @@ class PreStudyAssessmentApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: ThemeController.isDark,
-      builder: (context, isDark, _) => MaterialApp(
-        navigatorKey: navigatorKey,
-        title: 'Pre-Study IT Knowledge Assessment',
-        debugShowCheckedModeBanner: false,
-        theme: isDark ? AppTheme.dark : AppTheme.light,
-        home: const SplashScreen(),
+      builder: (context, isDark, _) => ValueListenableBuilder<Locale>(
+        valueListenable: LocaleController.locale,
+        builder: (context, locale, _) => MaterialApp(
+          navigatorKey: navigatorKey,
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: isDark ? AppTheme.dark : AppTheme.light,
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const SplashScreen(),
+        ),
       ),
     );
   }

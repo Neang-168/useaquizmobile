@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'answer_review_screen.dart';
 
 class TeacherResultsScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class TeacherResultsScreen extends StatefulWidget {
 
 class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
   String _query = '';
-  String _filter = 'All';
+  PerformanceLevel? _filter;
   late Future<List<TeacherResult>> _future;
 
   @override
@@ -45,7 +46,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
           );
           if (widget.embedded) return loading;
           return Scaffold(
-            appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).resultsAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: loading),
           );
         }
@@ -53,7 +54,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
           final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
           if (widget.embedded) return error;
           return Scaffold(
-            appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+            appBar: AppBar(title: Text(AppLocalizations.of(context).resultsAppBarTitle), leading: const BackButton()),
             body: SafeArea(top: false, child: error),
           );
         }
@@ -73,25 +74,26 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
   }
 
   Widget _buildBody(BuildContext context, List<TeacherResult> results) {
+    final l = AppLocalizations.of(context);
     final filtered = results.where((r) {
       final q = _query.toLowerCase();
       final matchesQuery = r.studentName.toLowerCase().contains(q) || r.subjectName.toLowerCase().contains(q);
-      final matchesFilter = _filter == 'All' || r.level.label == _filter;
+      final matchesFilter = _filter == null || r.level == _filter;
       return matchesQuery && matchesFilter;
     }).toList();
 
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text('All Results', style: Theme.of(context).textTheme.headlineMedium),
+        Text(l.allResultsTitle, style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        Text('Every student\'s quiz result across all classes', style: Theme.of(context).textTheme.bodyMedium),
+        Text(l.everyStudentResultSubtitle, style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 14),
 
         TextField(
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
-            hintText: 'Search by student or subject...',
+            hintText: l.searchStudentSubjectHint,
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
         ),
@@ -101,12 +103,12 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
           height: 36,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: ['All', 'Excellent', 'Good', 'Average', 'Beginner'].map((f) {
+            children: [null, ...PerformanceLevel.values].map((f) {
               final selected = _filter == f;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(f),
+                  label: Text(f?.label ?? l.allFilter),
                   selected: selected,
                   onSelected: (_) => setState(() => _filter = f),
                   selectedColor: AppColors.primary,
@@ -123,10 +125,10 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
         const SizedBox(height: 18),
 
         if (filtered.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.fact_check_outlined,
-            title: 'No results found',
-            subtitle: 'Try a different search term or filter.',
+            title: l.noResultsFound,
+            subtitle: l.tryDifferentSearch,
           )
         else
           ...filtered.map((r) => Padding(
@@ -175,7 +177,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen> {
 
     if (widget.embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: const Text('Results'), leading: const BackButton()),
+      appBar: AppBar(title: Text(l.resultsAppBarTitle), leading: const BackButton()),
       body: SafeArea(top: false, child: body),
     );
   }

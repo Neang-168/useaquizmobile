@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -32,12 +33,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(l.notificationsTitle),
         leading: const BackButton(),
         actions: [
-          TextButton(onPressed: _markAllRead, child: const Text('Mark all read', style: TextStyle(color: AppColors.primary, fontSize: 12.5))),
+          TextButton(onPressed: _markAllRead, child: Text(l.markAllRead, style: const TextStyle(color: AppColors.primary, fontSize: 12.5))),
         ],
       ),
       body: SafeArea(
@@ -65,8 +67,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             }
             final notifications = snapshot.data!;
             if (notifications.isEmpty) {
-              return const EmptyState(
-                  icon: Icons.notifications_off_outlined, title: 'No notifications', subtitle: 'You\'re all caught up!');
+              return EmptyState(
+                  icon: Icons.notifications_off_outlined, title: l.noNotifications, subtitle: l.noNotificationsSubtitle);
             }
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),

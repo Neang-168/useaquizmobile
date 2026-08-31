@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'subject_quizzes_screen.dart';
 
 class SubjectsScreen extends StatefulWidget {
@@ -27,7 +28,9 @@ class SubjectsScreen extends StatefulWidget {
 
 class _SubjectsScreenState extends State<SubjectsScreen> {
   String _query = '';
-  String _classFilter = 'All';
+  // null means "All" — kept locale-independent since the visible chip label
+  // ("All" / translated equivalent) can change when the user switches language.
+  String? _classFilter;
   late Future<List<Subject>> _future;
 
   @override
@@ -56,6 +59,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return FutureBuilder<List<Subject>>(
       future: _future,
       builder: (context, snapshot) {
@@ -75,7 +79,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           if (widget.embedded) return loading;
           return Scaffold(
             appBar: AppBar(
-              title: Text(widget.classRoomName ?? 'Subjects'),
+              title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),
               leading: const BackButton(),
             ),
             body: SafeArea(top: false, child: loading),
@@ -86,7 +90,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           if (widget.embedded) return error;
           return Scaffold(
             appBar: AppBar(
-              title: Text(widget.classRoomName ?? 'Subjects'),
+              title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),
               leading: const BackButton(),
             ),
             body: SafeArea(top: false, child: error),
@@ -98,13 +102,11 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   }
 
   Widget _buildBody(BuildContext context, List<Subject> subjects) {
-    final classNames = [
-      'All',
-      ...subjects.map((s) => s.className).where((c) => c.isNotEmpty).toSet(),
-    ];
+    final l = AppLocalizations.of(context);
+    final classNames = subjects.map((s) => s.className).where((c) => c.isNotEmpty).toSet();
     final filtered = subjects.where((s) {
       final matchesQuery = s.name.toLowerCase().contains(_query.toLowerCase());
-      final matchesClass = _classFilter == 'All' || s.className == _classFilter;
+      final matchesClass = _classFilter == null || s.className == _classFilter;
       return matchesQuery && matchesClass;
     }).toList();
 
@@ -114,12 +116,12 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       children: [
         Text(
           widget.classRoomName ??
-              (widget.jumpToAssessments ? 'Assessments' : 'My Subjects'),
+              (widget.jumpToAssessments ? l.assessmentsTitle : l.mySubjects),
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 4),
         Text(
-          'Explore subjects and their pre-study assessments',
+          l.exploreSubjectsSubtitle,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 14),
@@ -127,7 +129,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         TextField(
           onChanged: (v) => setState(() => _query = v),
           decoration: InputDecoration(
-            hintText: 'Search subjects...',
+            hintText: l.searchSubjectsHint,
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
         ),
@@ -137,12 +139,12 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           height: 36,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: classNames.map((c) {
+            children: [null, ...classNames].map((c) {
               final selected = _classFilter == c;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(c),
+                  label: Text(c ?? l.allFilter),
                   selected: selected,
                   onSelected: (_) => setState(() => _classFilter = c),
                   selectedColor: AppColors.primary,
@@ -164,10 +166,10 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         const SizedBox(height: 18),
 
         if (filtered.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.search_off_rounded,
-            title: 'No subjects found',
-            subtitle: 'Try a different search term or filter.',
+            title: l.noSubjectsFound,
+            subtitle: l.tryDifferentSearch,
           )
         else
           ...filtered.map(
@@ -247,7 +249,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     if (widget.embedded) return refreshableBody;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.classRoomName ?? 'Subjects'),
+        title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),
         leading: const BackButton(),
       ),
       body: SafeArea(top: false, child: refreshableBody),

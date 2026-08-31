@@ -5,6 +5,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'assessment_result_screen.dart';
 
 /// Loads the quiz's actual questions. Laravel's `GET /student/quizzes/{id}`
@@ -58,10 +59,10 @@ class _QuizScreenState extends State<QuizScreen> {
             }
             final assessment = snapshot.data!;
             if (assessment.questions.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.quiz_outlined,
-                title: 'No questions available',
-                subtitle: 'This quiz has no questions to take right now.',
+                title: AppLocalizations.of(context).noQuestionsAvailable,
+                subtitle: AppLocalizations.of(context).noQuestionsAvailableSubtitle,
               );
             }
             return _QuizTakingView(assessment: assessment);
@@ -249,7 +250,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
       setState(() => _submitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Couldn\'t submit: $e'),
+          content: Text(AppLocalizations.of(context).couldntSubmit('$e')),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -258,6 +259,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
 
   void _showSubmitDialog() {
     final unanswered = _assessment.questions.length - _answeredCount;
+    final l = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
@@ -288,14 +290,12 @@ class _QuizTakingViewState extends State<_QuizTakingView>
               ),
               const SizedBox(height: 16),
               Text(
-                'Submit Assessment?',
+                l.submitDialogTitle,
                 style: Theme.of(ctx).textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(
-                unanswered > 0
-                    ? 'You have $unanswered unanswered question${unanswered > 1 ? 's' : ''}. You can\'t change your answers after submitting.'
-                    : 'You have answered all questions. You can\'t change your answers after submitting.',
+                unanswered > 0 ? l.unansweredMessage(unanswered) : l.allAnsweredMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(ctx).textTheme.bodyMedium,
               ),
@@ -305,7 +305,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Continue Assessment'),
+                      child: Text(l.continueAssessment),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -315,7 +315,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                         Navigator.pop(ctx);
                         _goToResult();
                       },
-                      child: const Text('Submit'),
+                      child: Text(l.submit),
                     ),
                   ),
                 ],
@@ -332,23 +332,22 @@ class _QuizTakingViewState extends State<_QuizTakingView>
   /// resumes with less time left next time. Warn before letting that happen,
   /// matching the web app's navigation lock during an active attempt.
   Future<bool> _confirmExit() async {
+    final l = AppLocalizations.of(context);
     final leave = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Leave this assessment?'),
-        content: const Text(
-          'Your timer keeps running even after you leave. If it runs out before you come back, your answers so far will be submitted automatically.',
-        ),
+        title: Text(l.leaveDialogTitle),
+        content: Text(l.leaveDialogBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Stay'),
+            child: Text(l.stay),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Leave Anyway',
-              style: TextStyle(color: AppColors.danger),
+            child: Text(
+              l.leaveAnyway,
+              style: const TextStyle(color: AppColors.danger),
             ),
           ),
         ],
@@ -359,6 +358,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final q = _assessment.questions[_current];
     final progress = (_current + 1) / _assessment.questions.length;
     final lowTime = _remaining.inSeconds <= 60;
@@ -443,7 +443,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Question ${_current + 1} of ${_assessment.questions.length}',
+                  l.questionOfTotal(_current + 1, _assessment.questions.length),
                   style: TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 12.5,
@@ -466,7 +466,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _flagged[_current] ? 'Flagged' : 'Flag',
+                        _flagged[_current] ? l.flagged : l.flagLabel,
                         style: TextStyle(
                           fontSize: 12.5,
                           color: _flagged[_current]
@@ -533,7 +533,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                         ? null
                         : () => setState(() => _current--),
                     icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                    label: const Text('Previous'),
+                    label: Text(l.previous),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -554,7 +554,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                                   ),
                                 )
                               : const Icon(Icons.check_rounded, size: 18),
-                          label: Text(_submitting ? 'Submitting...' : 'Submit'),
+                          label: Text(_submitting ? l.submitting : l.submit),
                         )
                       : ElevatedButton.icon(
                           onPressed: () => setState(() => _current++),
@@ -562,7 +562,7 @@ class _QuizTakingViewState extends State<_QuizTakingView>
                             Icons.arrow_forward_rounded,
                             size: 18,
                           ),
-                          label: const Text('Next'),
+                          label: Text(l.next),
                         ),
                 ),
               ],

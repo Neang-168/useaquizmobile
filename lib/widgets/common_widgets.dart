@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
+import '../l10n/generated/app_localizations.dart';
 
 typedef BottomNavItem = ({IconData icon, String label});
 
@@ -10,19 +11,20 @@ typedef BottomNavItem = ({IconData icon, String label});
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
-  final List<BottomNavItem> items;
-  const AppBottomNav({super.key, required this.currentIndex, required this.onTap, this.items = _defaultItems});
+  final List<BottomNavItem>? items;
+  const AppBottomNav({super.key, required this.currentIndex, required this.onTap, this.items});
 
-  static const _defaultItems = [
-    (icon: Icons.home_rounded, label: 'Home'),
-    (icon: Icons.menu_book_rounded, label: 'Subjects'),
-    (icon: Icons.fact_check_rounded, label: 'Assessments'),
-    (icon: Icons.history_rounded, label: 'History'),
-    (icon: Icons.person_rounded, label: 'Profile'),
-  ];
+  List<BottomNavItem> _defaultItems(AppLocalizations l) => [
+        (icon: Icons.home_rounded, label: l.navHome),
+        (icon: Icons.menu_book_rounded, label: l.navSubjects),
+        (icon: Icons.fact_check_rounded, label: l.navAssessments),
+        (icon: Icons.history_rounded, label: l.navHistory),
+        (icon: Icons.person_rounded, label: l.navProfile),
+      ];
 
   @override
   Widget build(BuildContext context) {
+    final resolvedItems = items ?? _defaultItems(AppLocalizations.of(context));
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -33,9 +35,9 @@ class AppBottomNav extends StatelessWidget {
         top: false,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: List.generate(items.length, (i) {
+          children: List.generate(resolvedItems.length, (i) {
             final active = i == currentIndex;
-            final item = items[i];
+            final item = resolvedItems[i];
             return GestureDetector(
               onTap: () => onTap(i),
               behavior: HitTestBehavior.opaque,
@@ -191,7 +193,7 @@ class ErrorStateView extends StatelessWidget {
             child: const Icon(Icons.cloud_off_rounded, size: 38, color: AppColors.danger),
           ),
           const SizedBox(height: 16),
-          Text('Couldn\'t load this', style: Theme.of(context).textTheme.titleMedium),
+          Text(AppLocalizations.of(context).couldntLoadThis, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -201,7 +203,7 @@ class ErrorStateView extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded, size: 18),
-            label: const Text('Retry'),
+            label: Text(AppLocalizations.of(context).retry),
           ),
         ],
       ),
@@ -241,10 +243,10 @@ class BrandHeaderBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'UNIVERSITY OF\nSOUTH-EAST ASIA',
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700, height: 1.3, letterSpacing: 0.3),
+                    AppLocalizations.of(context).universityName,
+                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700, height: 1.3, letterSpacing: 0.3),
                   ),
                 ),
                 GestureDetector(
@@ -486,13 +488,13 @@ class SettingsSwitchTile extends StatelessWidget {
   }
 }
 
-/// A tappable settings row for the profile "Preferences" card. Currently
-/// used for placeholder entries (Settings, Help & Support) with no
-/// destination screen yet, so [onTap] is a no-op.
+/// A tappable settings row for the profile "Preferences" card (e.g.
+/// Settings, Help & Support).
 class SettingsNavTile extends StatelessWidget {
   final IconData icon;
   final String label;
-  const SettingsNavTile({super.key, required this.icon, required this.label});
+  final VoidCallback onTap;
+  const SettingsNavTile({super.key, required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -500,7 +502,7 @@ class SettingsNavTile extends StatelessWidget {
       leading: IconBadge(icon: icon, color: AppColors.primary, size: 38),
       title: Text(label, style: Theme.of(context).textTheme.titleMedium),
       trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 }
@@ -514,13 +516,14 @@ class LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
       onPressed: loading ? null : onPressed,
       icon: loading
           ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
           : const Icon(Icons.logout_rounded, size: 18),
-      label: Text(loading ? 'Logging out...' : 'Log Out'),
+      label: Text(loading ? l.loggingOut : l.logOut),
     );
   }
 }

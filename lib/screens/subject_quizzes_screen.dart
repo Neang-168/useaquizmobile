@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'assessment_details_screen.dart';
 
 class SubjectQuizzesScreen extends StatefulWidget {
@@ -79,6 +80,7 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
               );
             }
             final quizzes = snapshot.data!;
+            final l = AppLocalizations.of(context);
 
             return RefreshIndicator(
               onRefresh: _refresh,
@@ -88,20 +90,20 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                 children: [
                   Text(
-                    'All Quiz',
+                    l.allQuizTitle,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Pre-study quizzes for ${widget.subjectName}',
+                    l.preStudyQuizzesFor(widget.subjectName),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 18),
                   if (quizzes.isEmpty)
-                    const EmptyState(
+                    EmptyState(
                       icon: Icons.quiz_outlined,
-                      title: 'No quizzes yet',
-                      subtitle: 'This subject has no pre-study quizzes yet.',
+                      title: l.noQuizzesYet,
+                      subtitle: l.noQuizzesYetSubtitle,
                     )
                   else
                     ...quizzes.map(
@@ -140,8 +142,11 @@ class _SubjectQuizzesScreenState extends State<SubjectQuizzesScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '${a.totalQuestions} questions · ${a.duration} min'
-                                        '${a.endAt != null ? ' · Due ${formatDisplayDate(a.endAt, withTime: true)}' : ''}',
+                                        l.questionsDuration(
+                                          a.totalQuestions,
+                                          a.duration,
+                                          a.endAt != null ? l.dueSuffix(formatDisplayDate(a.endAt, withTime: true)) : '',
+                                        ),
                                         style: Theme.of(
                                           context,
                                         ).textTheme.bodyMedium,

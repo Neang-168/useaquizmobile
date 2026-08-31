@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'classrooms_screen.dart';
 import 'subjects_screen.dart';
 import 'teacher_dashboard_screen.dart';
@@ -18,12 +19,12 @@ class TeacherHomeScreen extends StatefulWidget {
 class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   int _navIndex = 0;
 
-  static const _navItems = [
-    (icon: Icons.dashboard_rounded, label: 'Dashboard'),
-    (icon: Icons.fact_check_rounded, label: 'Results'),
-    (icon: Icons.meeting_room_rounded, label: 'Class'),
-    (icon: Icons.person_rounded, label: 'Profile'),
-  ];
+  List<BottomNavItem> _navItems(AppLocalizations l) => [
+        (icon: Icons.dashboard_rounded, label: l.navDashboard),
+        (icon: Icons.fact_check_rounded, label: l.navResults),
+        (icon: Icons.meeting_room_rounded, label: l.navClass),
+        (icon: Icons.person_rounded, label: l.navProfile),
+      ];
 
   void _openClassRoom(ClassRoom c) {
     Navigator.of(context).push(
@@ -58,7 +59,7 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       bottomNavigationBar: AppBottomNav(
         currentIndex: _navIndex,
         onTap: (i) => setState(() => _navIndex = i),
-        items: _navItems,
+        items: _navItems(AppLocalizations.of(context)),
       ),
     );
   }

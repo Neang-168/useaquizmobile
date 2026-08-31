@@ -3,6 +3,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
 import '../models/models.dart';
 import '../widgets/common_widgets.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'answer_review_screen.dart';
 import 'home_screen.dart';
 
@@ -14,6 +15,7 @@ class AssessmentResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final level = result.level;
     final pct = result.percentage.round();
     final canReview = (result.reviewQuestions?.isNotEmpty ?? false);
@@ -26,7 +28,7 @@ class AssessmentResultScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  Text('Assessment Complete', style: Theme.of(context).textTheme.headlineMedium),
+                  Text(l.assessmentComplete, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 4),
                   Text(subjectName, style: Theme.of(context).textTheme.bodyMedium),
                   const SizedBox(height: 28),
@@ -41,7 +43,7 @@ class AssessmentResultScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('$pct%', style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontSize: 34)),
-                        Text('Overall Score', style: Theme.of(context).textTheme.bodyMedium),
+                        Text(l.overallScore, style: Theme.of(context).textTheme.bodyMedium),
                       ],
                     ),
                   ),
@@ -54,11 +56,11 @@ class AssessmentResultScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: _statCard(context, Icons.stars_rounded, AppColors.primary, '${result.score}/${result.totalPoints}', 'Score'),
+                  child: _statCard(context, Icons.stars_rounded, AppColors.primary, '${result.score}/${result.totalPoints}', l.scoreLabel),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _statCard(context, Icons.flag_circle_rounded, AppColors.secondary, '${result.passMark}%', 'Pass Mark'),
+                  child: _statCard(context, Icons.flag_circle_rounded, AppColors.secondary, '${result.passMark}%', l.passMarkLabel),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -66,8 +68,8 @@ class AssessmentResultScreen extends StatelessWidget {
                       context,
                       result.passed ? Icons.check_circle_rounded : Icons.cancel_rounded,
                       result.passed ? AppColors.success : AppColors.danger,
-                      result.passed ? 'Passed' : 'Not Passed',
-                      'Status'),
+                      result.passed ? l.passed : l.notPassed,
+                      l.statusLabel),
                 ),
               ],
             ),
@@ -81,7 +83,7 @@ class AssessmentResultScreen extends StatelessWidget {
                     const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text('A per-question answer review isn\'t available yet — only your overall score is returned.',
+                      child: Text(l.reviewUnavailable,
                           style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   ],
@@ -94,12 +96,12 @@ class AssessmentResultScreen extends StatelessWidget {
                       selections: result.reviewSelections ?? const [],
                     ))),
                 icon: const Icon(Icons.rate_review_outlined, size: 19),
-                label: const Text('View Review'),
+                label: Text(l.viewReview),
               ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pushAndRemoveUntil(fadeRoute(const HomeScreen()), (r) => false),
-              child: const Text('Back to Home'),
+              child: Text(l.backToHome),
             ),
           ],
         ),

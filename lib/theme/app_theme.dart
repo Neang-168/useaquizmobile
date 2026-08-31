@@ -23,6 +23,29 @@ class ThemeController {
   }
 }
 
+/// Global language switch (English / Khmer). Mirrors [ThemeController]'s
+/// shape: the app root listens to this and rebuilds [MaterialApp] with a
+/// different [Locale], and model-layer code with no [BuildContext] (e.g.
+/// `PerformanceLevel.label`) reads [locale] directly via
+/// `lookupAppLocalizations` instead of `AppLocalizations.of(context)`.
+class LocaleController {
+  LocaleController._();
+  static const _prefsKey = 'app_locale';
+  static final ValueNotifier<Locale> locale = ValueNotifier(const Locale('en'));
+
+  static Future<void> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString(_prefsKey);
+    if (code == 'km') locale.value = const Locale('km');
+  }
+
+  static Future<void> setLocale(Locale value) async {
+    locale.value = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefsKey, value.languageCode);
+  }
+}
+
 /// Central design system for the Pre-Study IT Knowledge Assessment System.
 /// Material Design 3, matched to USEA's web portal (navy/gold/teal), 20px
 /// rounded corners, Inter type.

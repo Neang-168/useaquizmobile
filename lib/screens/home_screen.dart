@@ -13,6 +13,7 @@ import 'history_screen.dart';
 import 'profile_screen.dart';
 import 'notifications_screen.dart';
 import 'schedule_screen.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -148,6 +149,7 @@ class _DashboardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final completedTotal = data.stats.completedCount;
     final totalAssessments = data.stats.completedCount + data.stats.todoCount;
     final progress = totalAssessments == 0
@@ -186,7 +188,7 @@ class _DashboardBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome back 👋',
+                    l.welcomeBack,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   Text(
@@ -278,13 +280,13 @@ class _DashboardBody extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Your Learning Progress',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    Text(
+                      l.yourLearningProgress,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '$completedTotal of $totalAssessments completed',
+                      l.completedOfTotal(completedTotal, totalAssessments),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -307,16 +309,16 @@ class _DashboardBody extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Continue',
-                          style: TextStyle(fontSize: 13),
+                        child: Text(
+                          l.continueLabel,
+                          style: const TextStyle(fontSize: 13),
                         ),
                       )
                     else
                       Text(
                         totalAssessments == 0
-                            ? 'No assessments assigned yet'
-                            : 'All caught up — nothing due right now',
+                            ? l.noAssessmentsAssignedYet
+                            : l.allCaughtUpNothingDue,
                         style: const TextStyle(color: Colors.white70, fontSize: 12.5),
                       ),
                   ],
@@ -345,10 +347,10 @@ class _DashboardBody extends StatelessWidget {
 
         // Completed vs. to-do split, at a glance.
         if (totalAssessments == 0)
-          const EmptyState(
+          EmptyState(
             icon: Icons.bar_chart_rounded,
-            title: 'No progress yet',
-            subtitle: 'Your completed and to-do assessments will show up here.',
+            title: l.noProgressYet,
+            subtitle: l.noProgressYetSubtitle,
           )
         else
           Container(
@@ -358,17 +360,19 @@ class _DashboardBody extends StatelessWidget {
             child: _ProgressBarChart(
               completed: data.stats.completedCount,
               todo: data.stats.todoCount,
+              completedLabel: l.completedChartLabel,
+              todoLabel: l.todoChartLabel,
             ),
           ),
         const SizedBox(height: 26),
 
-        SectionHeader(title: 'Announcements'),
+        SectionHeader(title: l.announcementsTitle),
         const SizedBox(height: 12),
         if (data.stats.announcements.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.campaign_outlined,
-            title: 'No announcements',
-            subtitle: 'Feedback from your teachers will appear here.',
+            title: l.noAnnouncements,
+            subtitle: l.noAnnouncementsSubtitle,
           )
         else
           ...data.stats.announcements
@@ -410,18 +414,18 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 26),
 
         SectionHeader(
-          title: 'Upcoming Assessments',
-          actionLabel: 'See all',
+          title: l.upcomingAssessments,
+          actionLabel: l.seeAll,
           onAction: () => Navigator.of(
             context,
           ).push(fadeRoute(const SubjectsScreen(jumpToAssessments: true))),
         ),
         const SizedBox(height: 12),
         if (data.stats.dueSoon.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.event_available_outlined,
-            title: 'All caught up',
-            subtitle: 'No upcoming pre-study assessments right now.',
+            title: l.allCaughtUp,
+            subtitle: l.noUpcomingSubtitle,
           )
         else
           ...data.stats.dueSoon.map(
@@ -457,8 +461,11 @@ class _DashboardBody extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${a.duration} min · ${a.totalQuestions} questions'
-                                  '${a.endAt != null ? ' · Due ${formatDisplayDate(a.endAt, withTime: true)}' : ''}',
+                                  l.durationQuestionsDue(
+                                    a.duration,
+                                    a.totalQuestions,
+                                    a.endAt != null ? l.dueSuffix(formatDisplayDate(a.endAt, withTime: true)) : '',
+                                  ),
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
@@ -479,8 +486,8 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 26),
 
         SectionHeader(
-          title: 'Enrolled Subjects',
-          actionLabel: 'View all',
+          title: l.enrolledSubjects,
+          actionLabel: l.viewAll,
           onAction: () =>
               Navigator.of(context).push(fadeRoute(const SubjectsScreen())),
         ),
@@ -497,7 +504,7 @@ class _DashboardBody extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
-                  '${data.stats.enrolledSubjectsCount} subjects enrolled',
+                  l.subjectsEnrolledCount(data.stats.enrolledSubjectsCount),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -507,16 +514,16 @@ class _DashboardBody extends StatelessWidget {
         const SizedBox(height: 26),
 
         SectionHeader(
-          title: 'Completed Assessments',
-          actionLabel: 'History',
+          title: l.completedAssessments,
+          actionLabel: l.historyAction,
           onAction: () {},
         ),
         const SizedBox(height: 12),
         if (data.history.isEmpty)
-          const EmptyState(
+          EmptyState(
             icon: Icons.description_outlined,
-            title: 'No completed assessments yet',
-            subtitle: 'Finished pre-study quizzes will appear here.',
+            title: l.noCompletedYet,
+            subtitle: l.noCompletedYetSubtitle,
           )
         else
           ...data.history
@@ -569,7 +576,14 @@ class _DashboardBody extends StatelessWidget {
 class _ProgressBarChart extends StatelessWidget {
   final int completed;
   final int todo;
-  const _ProgressBarChart({required this.completed, required this.todo});
+  final String completedLabel;
+  final String todoLabel;
+  const _ProgressBarChart({
+    required this.completed,
+    required this.todo,
+    required this.completedLabel,
+    required this.todoLabel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -596,7 +610,7 @@ class _ProgressBarChart extends StatelessWidget {
               showTitles: true,
               reservedSize: 24,
               getTitlesWidget: (value, meta) {
-                final label = value.toInt() == 0 ? 'Completed' : 'To do';
+                final label = value.toInt() == 0 ? completedLabel : todoLabel;
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
