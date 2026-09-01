@@ -146,6 +146,7 @@
   "honestyNotice": "ការវាយតម្លៃនេះវាស់ស្ទង់ចំណេះដឹងមុនរបស់អ្នក។ វានឹងមិនប៉ះពាល់ដល់ពិន្ទុចុងក្រោយរបស់អ្នកទេ — សូមឆ្លើយដោយស្មោះត្រង់។",
   "attemptsUsedUp": "ប្រើអស់ចំនួនដងហើយ",
   "assessmentClosed": "ការវាយតម្លៃបានបិទ",
+  "assessmentNotYetAvailable": "មិនទាន់អាចធ្វើបានទេ",
   "startAssessment": "ចាប់ផ្ដើមការវាយតម្លៃ",
 
   "instructionsAppBarTitle": "សេចក្ដីណែនាំ",
@@ -269,5 +270,13 @@
   "classesAppBarTitle": "ថ្នាក់រៀន",
   "noClassRoomsFound": "រកមិនឃើញថ្នាក់រៀន",
   "tryDifferentSearchTerm": "សូមសាកល្បងពាក្យស្វែងរកផ្សេង។",
-  "subjectCount": "{count, plural, other{{count} មុខវិជ្ជា}}"
+  "subjectCount": "{count, plural, other{{count} មុខវិជ្ជា}}",
+
+  "genericErrorMessage": "មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្ដងទៀត។",
+  "couldNotReachServer": "មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេនៅ {url} បានទេ",
+  "sessionExpiredMessage": "សម័យប្រើប្រាស់បានផុតកំណត់។ សូមចូលគណនីម្ដងទៀត។",
+  "requestFailedWithCode": "សំណើបានបរាជ័យ ({statusCode})",
+  "adminNotSupportedMessage": "គណនីអ្នកគ្រប់គ្រងមិនត្រូវបានគាំទ្រនៅក្នុងកម្មវិធីនេះទេ សូមប្រើផ្ទាំងគ្រប់គ្រងតាមវេប។",
+  "unrecognizedRoleMessage": "មិនស្គាល់តួនាទីគណនី \"{role}\" ទេ។",
+  "assessmentNotFoundMessage": "រកមិនឃើញកម្រងសំណួរនេះទេ។"
 }

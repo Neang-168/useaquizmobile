@@ -470,6 +470,27 @@ class Assessment {
   );
 }
 
+/// "Your learning progress" completion counts, computed client-side from
+/// the full assigned-quiz list rather than trusted from the server's
+/// dashboard aggregate (`StudentDashboardStats.completedCount`/`todoCount`).
+/// That aggregate only counts quizzes that are still actionable, so a quiz
+/// that closed before the student ever attempted it silently drops out of
+/// both buckets there — inflating the completion percentage to look like
+/// 100% even when a quiz was missed.
+class AssessmentProgress {
+  final int completed;
+  final int todo;
+  const AssessmentProgress({required this.completed, required this.todo});
+
+  int get total => completed + todo;
+  double get percent => total == 0 ? 0.0 : completed / total;
+
+  factory AssessmentProgress.fromAssessments(List<Assessment> all) {
+    final completed = all.where((a) => a.lastSubmittedAt != null).length;
+    return AssessmentProgress(completed: completed, todo: all.length - completed);
+  }
+}
+
 /// Result of submitting a quiz, as returned by `POST
 /// /student/quizzes/:id/submit`. The live API only ever returns this score
 /// summary — no per-question correctness/explanations exist anywhere in the

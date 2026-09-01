@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
+import '../theme/app_theme.dart';
 import 'api_client.dart';
 import 'session.dart';
 
@@ -34,13 +35,11 @@ class AppRepository {
     final user = Map<String, dynamic>.from(json['user'] ?? const {});
     final roleStr = '${user['role'] ?? ''}';
     if (roleStr.toLowerCase() == 'admin') {
-      throw ApiException(
-        'Admin accounts aren\'t supported in this app — please use the web dashboard.',
-      );
+      throw ApiException(LocaleController.l.adminNotSupportedMessage);
     }
     final role = UserRole.values.firstWhere(
       (r) => r.name == roleStr.toLowerCase(),
-      orElse: () => throw ApiException('Unrecognized account role "$roleStr".'),
+      orElse: () => throw ApiException(LocaleController.l.unrecognizedRoleMessage(roleStr)),
     );
     final token = json['token'] as String;
     await Session.saveToken(token, remember: remember);
@@ -169,7 +168,7 @@ class AppRepository {
     for (final a in list) {
       if (a.id == id) return a;
     }
-    throw ApiException('Assessment not found.', statusCode: 404);
+    throw ApiException(LocaleController.l.assessmentNotFoundMessage, statusCode: 404);
   }
 
   /// Starts (or resumes) the timed attempt server-side and returns the full
@@ -188,14 +187,22 @@ class AppRepository {
         .toList();
   }
 
-  /// "Upcoming" here means still actionable — not yet closed and not out of
-  /// attempts — soonest due first; Laravel has no single endpoint for this,
-  /// so it's derived client-side from the full quiz list.
-  Future<List<Assessment>> fetchUpcomingAssessments() async {
+  /// The student's full assigned-quiz list, unfiltered — includes quizzes
+  /// that already closed, whether or not the student ever attempted them.
+  /// Used to compute accurate completion counts client-side (see
+  /// [AssessmentProgress]) rather than trusting the dashboard's narrower
+  /// "still actionable" aggregate.
+  Future<List<Assessment>> fetchAllAssessments() async {
     final json = await _api.get('/student/quizzes');
-    final all = (json['data'] as List)
+    return (json['data'] as List)
         .map((a) => Assessment.fromJson(Map<String, dynamic>.from(a)))
         .toList();
+  }
+
+  /// "Upcoming" here means still actionable — not yet closed and not out of
+  /// attempts — soonest due first.
+  Future<List<Assessment>> fetchUpcomingAssessments() async {
+    final all = await fetchAllAssessments();
     return all.where((a) => !a.isClosed && !a.attemptsExhausted).toList()
       ..sort((a, b) => (a.endAt ?? '').compareTo(b.endAt ?? ''));
   }

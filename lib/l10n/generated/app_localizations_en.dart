@@ -449,6 +449,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assessmentClosed => 'Assessment Closed';
 
   @override
+  String get assessmentNotYetAvailable => 'Not Yet Available';
+
+  @override
   String get startAssessment => 'Start Assessment';
 
   @override
@@ -836,4 +839,32 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get genericErrorMessage => 'Something went wrong. Please try again.';
+
+  @override
+  String couldNotReachServer(Object url) {
+    return 'Could not reach the server at $url';
+  }
+
+  @override
+  String get sessionExpiredMessage => 'Session expired. Please log in again.';
+
+  @override
+  String requestFailedWithCode(Object statusCode) {
+    return 'Request failed ($statusCode)';
+  }
+
+  @override
+  String get adminNotSupportedMessage =>
+      'Admin accounts aren\'t supported in this app — please use the web dashboard.';
+
+  @override
+  String unrecognizedRoleMessage(Object role) {
+    return 'Unrecognized account role \"$role\".';
+  }
+
+  @override
+  String get assessmentNotFoundMessage => 'Assessment not found.';
 }

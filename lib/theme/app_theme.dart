@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Global dark-mode switch. The app root listens to this and rebuilds with
 /// a different [ThemeData], and every [AppColors] getter below reads it too —
@@ -44,6 +45,11 @@ class LocaleController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefsKey, value.languageCode);
   }
+
+  /// For service/repository code with no [BuildContext] (e.g. error
+  /// messages built inside [ApiClient]/[AppRepository]) that still needs to
+  /// read the current translation.
+  static AppLocalizations get l => lookupAppLocalizations(locale.value);
 }
 
 /// Central design system for the Pre-Study IT Knowledge Assessment System.

@@ -449,6 +449,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get assessmentClosed => 'ការវាយតម្លៃបានបិទ';
 
   @override
+  String get assessmentNotYetAvailable => 'មិនទាន់អាចធ្វើបានទេ';
+
+  @override
   String get startAssessment => 'ចាប់ផ្ដើមការវាយតម្លៃ';
 
   @override
@@ -832,4 +835,33 @@ class AppLocalizationsKm extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get genericErrorMessage => 'មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្ដងទៀត។';
+
+  @override
+  String couldNotReachServer(Object url) {
+    return 'មិនអាចភ្ជាប់ទៅម៉ាស៊ីនមេនៅ $url បានទេ';
+  }
+
+  @override
+  String get sessionExpiredMessage =>
+      'សម័យប្រើប្រាស់បានផុតកំណត់។ សូមចូលគណនីម្ដងទៀត។';
+
+  @override
+  String requestFailedWithCode(Object statusCode) {
+    return 'សំណើបានបរាជ័យ ($statusCode)';
+  }
+
+  @override
+  String get adminNotSupportedMessage =>
+      'គណនីអ្នកគ្រប់គ្រងមិនត្រូវបានគាំទ្រនៅក្នុងកម្មវិធីនេះទេ សូមប្រើផ្ទាំងគ្រប់គ្រងតាមវេប។';
+
+  @override
+  String unrecognizedRoleMessage(Object role) {
+    return 'មិនស្គាល់តួនាទីគណនី \"$role\" ទេ។';
+  }
+
+  @override
+  String get assessmentNotFoundMessage => 'រកមិនឃើញកម្រងសំណួរនេះទេ។';
 }

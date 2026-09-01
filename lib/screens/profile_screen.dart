@@ -25,7 +25,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileData {
   final Student student;
   final StudentDashboardStats stats;
-  const _ProfileData({required this.student, required this.stats});
+  final AssessmentProgress progress;
+  const _ProfileData({required this.student, required this.stats, required this.progress});
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
@@ -42,8 +43,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<_ProfileData> _load() async {
     final repo = AppRepository.instance;
-    final results = await Future.wait([repo.fetchProfile(), repo.fetchStudentDashboard()]);
-    return _ProfileData(student: results[0] as Student, stats: results[1] as StudentDashboardStats);
+    final results = await Future.wait(
+      [repo.fetchProfile(), repo.fetchStudentDashboard(), repo.fetchAllAssessments()],
+    );
+    return _ProfileData(
+      student: results[0] as Student,
+      stats: results[1] as StudentDashboardStats,
+      progress: AssessmentProgress.fromAssessments(results[2] as List<Assessment>),
+    );
   }
 
   Future<void> _loadPreferences() async {
@@ -116,9 +123,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildBody(BuildContext context, _ProfileData data) {
     final l = AppLocalizations.of(context);
     final student = data.student;
-    final completed = data.stats.completedCount;
-    final total = completed + data.stats.todoCount;
-    final percent = total == 0 ? 0.0 : completed / total;
+    final completed = data.progress.completed;
+    final total = data.progress.total;
+    final percent = data.progress.percent;
 
     final body = Column(
       children: [

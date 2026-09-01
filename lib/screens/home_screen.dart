@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
@@ -74,7 +73,17 @@ class _HomeDashboardBodyState extends State<_HomeDashboardBody> {
     final profile = await repo.fetchProfile();
     final stats = await repo.fetchStudentDashboard();
     final history = await repo.fetchHistory();
-    return _DashboardData(studentName: profile.name, stats: stats, history: history);
+    final allAssessments = await repo.fetchAllAssessments();
+    final upcoming = allAssessments.where((a) => !a.isClosed && !a.attemptsExhausted).toList()
+      ..sort((a, b) => (a.endAt ?? '').compareTo(b.endAt ?? ''));
+    final progress = AssessmentProgress.fromAssessments(allAssessments);
+    return _DashboardData(
+      studentName: profile.name,
+      stats: stats,
+      history: history,
+      upcoming: upcoming,
+      progress: progress,
+    );
   }
 
   void _retry() => setState(() => _future = _load());
@@ -125,10 +134,14 @@ class _DashboardData {
   final String studentName;
   final StudentDashboardStats stats;
   final List<HistoryItem> history;
+  final List<Assessment> upcoming;
+  final AssessmentProgress progress;
   _DashboardData({
     required this.studentName,
     required this.stats,
     required this.history,
+    required this.upcoming,
+    required this.progress,
   });
 }
 
@@ -150,11 +163,9 @@ class _DashboardBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final completedTotal = data.stats.completedCount;
-    final totalAssessments = data.stats.completedCount + data.stats.todoCount;
-    final progress = totalAssessments == 0
-        ? 0.0
-        : completedTotal / totalAssessments;
+    final completedTotal = data.progress.completed;
+    final totalAssessments = data.progress.total;
+    final progress = data.progress.percent;
     final nextAssessment = data.stats.dueSoon.isNotEmpty
         ? data.stats.dueSoon.first
         : null;
@@ -353,15 +364,28 @@ class _DashboardBody extends StatelessWidget {
             subtitle: l.noProgressYetSubtitle,
           )
         else
-          Container(
-            height: 160,
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
-            decoration: softCardDecoration(),
-            child: _ProgressBarChart(
-              completed: data.stats.completedCount,
-              todo: data.stats.todoCount,
-              completedLabel: l.completedChartLabel,
-              todoLabel: l.todoChartLabel,
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: StatCard(
+                    icon: Icons.check_circle_rounded,
+                    label: l.completedChartLabel,
+                    value: '${data.progress.completed}',
+                    color: AppColors.success,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StatCard(
+                    icon: Icons.pending_actions_rounded,
+                    label: l.todoChartLabel,
+                    value: '${data.progress.todo}',
+                    color: AppColors.warning,
+                  ),
+                ),
+              ],
             ),
           ),
         const SizedBox(height: 26),
@@ -384,10 +408,11 @@ class _DashboardBody extends StatelessWidget {
                     padding: const EdgeInsets.all(14),
                     decoration: softCardDecoration(),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         IconBadge(
                           icon: Icons.campaign_rounded,
-                          color: AppColors.secondary,
+                          color: AppColors.accent,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -421,14 +446,14 @@ class _DashboardBody extends StatelessWidget {
           ).push(fadeRoute(const SubjectsScreen(jumpToAssessments: true))),
         ),
         const SizedBox(height: 12),
-        if (data.stats.dueSoon.isEmpty)
+        if (data.upcoming.isEmpty)
           EmptyState(
             icon: Icons.event_available_outlined,
             title: l.allCaughtUp,
             subtitle: l.noUpcomingSubtitle,
           )
         else
-          ...data.stats.dueSoon.map(
+          ...data.upcoming.map(
             (a) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Container(
@@ -460,13 +485,16 @@ class _DashboardBody extends StatelessWidget {
                                   color: AppColors.textMuted,
                                 ),
                                 const SizedBox(width: 4),
-                                Text(
-                                  l.durationQuestionsDue(
-                                    a.duration,
-                                    a.totalQuestions,
-                                    a.endAt != null ? l.dueSuffix(formatDisplayDate(a.endAt, withTime: true)) : '',
+                                Expanded(
+                                  child: Text(
+                                    l.durationQuestionsDue(
+                                      a.duration,
+                                      a.totalQuestions,
+                                      a.endAt != null ? l.dueSuffix(formatDisplayDate(a.endAt, withTime: true)) : '',
+                                    ),
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
                             ),
@@ -569,84 +597,6 @@ class _DashboardBody extends StatelessWidget {
                 ),
               ),
       ],
-    );
-  }
-}
-
-class _ProgressBarChart extends StatelessWidget {
-  final int completed;
-  final int todo;
-  final String completedLabel;
-  final String todoLabel;
-  const _ProgressBarChart({
-    required this.completed,
-    required this.todo,
-    required this.completedLabel,
-    required this.todoLabel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final maxY =
-        ([completed, todo, 1].reduce((a, b) => a > b ? a : b)).toDouble() * 1.2;
-    return BarChart(
-      BarChartData(
-        maxY: maxY,
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barTouchData: BarTouchData(enabled: false),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 24,
-              getTitlesWidget: (value, meta) {
-                final label = value.toInt() == 0 ? completedLabel : todoLabel;
-                return Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    label,
-                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        barGroups: [
-          BarChartGroupData(
-            x: 0,
-            barRods: [
-              BarChartRodData(
-                toY: completed.toDouble(),
-                color: AppColors.success,
-                width: 32,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ],
-          ),
-          BarChartGroupData(
-            x: 1,
-            barRods: [
-              BarChartRodData(
-                toY: todo.toDouble(),
-                color: AppColors.warning,
-                width: 32,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

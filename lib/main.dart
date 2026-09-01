@@ -9,9 +9,9 @@ import 'l10n/generated/app_localizations.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
-  ThemeController.load();
-  LocaleController.load();
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Future.wait([ThemeController.load(), LocaleController.load()]);
   // Whenever a request comes back 401 (expired/invalid token), bounce back
   // to the login screen from wherever the user currently is.
   ApiClient.onUnauthorized = () {

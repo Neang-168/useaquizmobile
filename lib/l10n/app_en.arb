@@ -160,6 +160,7 @@
   "honestyNotice": "This assessment measures your prior knowledge. It will not affect your final grade — answer honestly.",
   "attemptsUsedUp": "Attempts Used Up",
   "assessmentClosed": "Assessment Closed",
+  "assessmentNotYetAvailable": "Not Yet Available",
   "startAssessment": "Start Assessment",
 
   "instructionsAppBarTitle": "Instructions",
@@ -292,5 +293,16 @@
   "noClassRoomsFound": "No class rooms found",
   "tryDifferentSearchTerm": "Try a different search term.",
   "subjectCount": "{count, plural, =1{{count} subject} other{{count} subjects}}",
-  "@subjectCount": { "placeholders": { "count": {} } }
+  "@subjectCount": { "placeholders": { "count": {} } },
+
+  "genericErrorMessage": "Something went wrong. Please try again.",
+  "couldNotReachServer": "Could not reach the server at {url}",
+  "@couldNotReachServer": { "placeholders": { "url": {} } },
+  "sessionExpiredMessage": "Session expired. Please log in again.",
+  "requestFailedWithCode": "Request failed ({statusCode})",
+  "@requestFailedWithCode": { "placeholders": { "statusCode": {} } },
+  "adminNotSupportedMessage": "Admin accounts aren't supported in this app — please use the web dashboard.",
+  "unrecognizedRoleMessage": "Unrecognized account role \"{role}\".",
+  "@unrecognizedRoleMessage": { "placeholders": { "role": {} } },
+  "assessmentNotFoundMessage": "Assessment not found."
 }

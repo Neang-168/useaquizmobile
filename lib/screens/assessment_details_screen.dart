@@ -148,14 +148,16 @@ class _AssessmentDetailsScreenState extends State<AssessmentDetailsScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   child: ElevatedButton(
-                    onPressed: (a.attemptsExhausted || a.isClosed)
+                    onPressed: (a.attemptsExhausted || a.isClosed || a.isUpcoming)
                         ? null
                         : () => Navigator.of(context).push(fadeRoute(AssessmentInstructionsScreen(assessment: a))),
                     child: Text(a.attemptsExhausted
                         ? l.attemptsUsedUp
                         : a.isClosed
                             ? l.assessmentClosed
-                            : l.startAssessment),
+                            : a.isUpcoming
+                                ? l.assessmentNotYetAvailable
+                                : l.startAssessment),
                   ),
                 ),
               ],

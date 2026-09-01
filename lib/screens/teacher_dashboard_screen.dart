@@ -203,7 +203,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: _StatCard(
+                  child: StatCard(
                     icon: Icons.edit_note_rounded,
                     label: l.pendingEssaysLabel,
                     value: '${stats.pendingEssaysCount}',
@@ -212,7 +212,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _StatCard(
+                  child: StatCard(
                     icon: Icons.emoji_events_rounded,
                     label: l.averageScoreLabel,
                     value: '${stats.averageScore.toStringAsFixed(1)}%',
@@ -346,45 +346,6 @@ class _HeroStat extends StatelessWidget {
 }
 
 Widget _heroDivider() => Container(width: 1, height: 52, color: Colors.white.withValues(alpha: 0.18));
-
-/// A tinted secondary-metric card, replacing the old plain white
-/// [softCardDecoration] tile so the dashboard doesn't read as a flat grid
-/// of identical white boxes.
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-  const _StatCard({required this.icon, required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: color.withValues(alpha: 0.18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.16), shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(height: 10),
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-          const SizedBox(height: 2),
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-}
 
 /// Shared row card for the three list sections (Recent Quizzes, Needs
 /// Attention, Upcoming Quizzes) so they render with identical spacing and

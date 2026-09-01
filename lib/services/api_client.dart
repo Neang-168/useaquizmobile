@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import '../theme/app_theme.dart';
 import 'session.dart';
 
 /// Thrown for any network/API failure. Callers use this to decide whether
@@ -18,7 +19,7 @@ class ApiException implements Exception {
 /// Human-readable text for an error caught from a repository call —
 /// used by screens to populate an [ErrorStateView].
 String describeApiError(Object error) =>
-    error is ApiException ? error.message : 'Something went wrong. Please try again.';
+    error is ApiException ? error.message : LocaleController.l.genericErrorMessage;
 
 /// Thin wrapper around package:http that adds base URL, auth header,
 /// timeouts, and consistent JSON/error handling.
@@ -67,7 +68,7 @@ class ApiClient {
       res = await call().timeout(ApiConfig.timeout);
     } catch (_) {
       // Covers SocketException, TimeoutException, handshake errors, etc.
-      throw ApiException('Could not reach the server at ${ApiConfig.baseUrl}', isConnectivity: true);
+      throw ApiException(LocaleController.l.couldNotReachServer(ApiConfig.baseUrl), isConnectivity: true);
     }
 
     if (res.statusCode == 401) {
@@ -77,10 +78,10 @@ class ApiClient {
         onUnauthorized?.call();
         _handling401 = false;
       }
-      throw ApiException('Session expired. Please log in again.', statusCode: 401);
+      throw ApiException(LocaleController.l.sessionExpiredMessage, statusCode: 401);
     }
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      String msg = 'Request failed (${res.statusCode})';
+      String msg = LocaleController.l.requestFailedWithCode(res.statusCode);
       try {
         final decoded = jsonDecode(res.body);
         if (decoded is Map && decoded['message'] != null) msg = decoded['message'];

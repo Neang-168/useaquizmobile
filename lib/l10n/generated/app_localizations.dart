@@ -896,6 +896,12 @@ abstract class AppLocalizations {
   /// **'Assessment Closed'**
   String get assessmentClosed;
 
+  /// No description provided for @assessmentNotYetAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Yet Available'**
+  String get assessmentNotYetAvailable;
+
   /// No description provided for @startAssessment.
   ///
   /// In en, this message translates to:
@@ -1567,6 +1573,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{{count} subject} other{{count} subjects}}'**
   String subjectCount(num count);
+
+  /// No description provided for @genericErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get genericErrorMessage;
+
+  /// No description provided for @couldNotReachServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server at {url}'**
+  String couldNotReachServer(Object url);
+
+  /// No description provided for @sessionExpiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please log in again.'**
+  String get sessionExpiredMessage;
+
+  /// No description provided for @requestFailedWithCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Request failed ({statusCode})'**
+  String requestFailedWithCode(Object statusCode);
+
+  /// No description provided for @adminNotSupportedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin accounts aren\'t supported in this app — please use the web dashboard.'**
+  String get adminNotSupportedMessage;
+
+  /// No description provided for @unrecognizedRoleMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrecognized account role \"{role}\".'**
+  String unrecognizedRoleMessage(Object role);
+
+  /// No description provided for @assessmentNotFoundMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Assessment not found.'**
+  String get assessmentNotFoundMessage;
 }
 
 class _AppLocalizationsDelegate
