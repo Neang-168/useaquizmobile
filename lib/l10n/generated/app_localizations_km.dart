@@ -18,10 +18,10 @@ class AppLocalizationsKm extends AppLocalizations {
   String get navHome => 'ទំព័រដើម';
 
   @override
-  String get navSubjects => 'មុខវិជ្ជា';
+  String get navSubjects => 'វគ្គសិក្សារបស់ខ្ញុំ';
 
   @override
-  String get navAssessments => 'ការវាយតម្លៃ';
+  String get navAssessments => 'តេស្ត';
 
   @override
   String get navHistory => 'ប្រវត្តិ';
@@ -215,6 +215,76 @@ class AppLocalizationsKm extends AppLocalizations {
   String get statusLabel => 'ស្ថានភាព';
 
   @override
+  String get roleLabel => 'តួនាទី';
+
+  @override
+  String get joinedLabel => 'ចូលរួមនៅ';
+
+  @override
+  String get genderLabel => 'ភេទ';
+
+  @override
+  String get dobLabel => 'ថ្ងៃខែឆ្នាំកំណើត';
+
+  @override
+  String get addressLabel => 'អាសយដ្ឋាន';
+
+  @override
+  String get khmerNameLabel => 'ឈ្មោះខ្មែរ';
+
+  @override
+  String get facultyLabel => 'មហាវិទ្យាល័យ';
+
+  @override
+  String get degreeLabel => 'សញ្ញាបត្រ';
+
+  @override
+  String get departmentLabel => 'ដេប៉ាតឺម៉ង់';
+
+  @override
+  String get semesterLabel => 'ឆមាស';
+
+  @override
+  String get termLabel => 'ឆមាសរង';
+
+  @override
+  String get shiftLabel => 'វេន';
+
+  @override
+  String get stageLabel => 'កម្រិត';
+
+  @override
+  String get promotionLabel => 'ឆ្នាំបញ្ចប់';
+
+  @override
+  String get studentCodeLabel => 'លេខសម្គាល់សិស្ស';
+
+  @override
+  String get admissionDateLabel => 'ថ្ងៃចូលរៀន';
+
+  @override
+  String get enrollmentDateLabel => 'ថ្ងៃចុះឈ្មោះ';
+
+  @override
+  String get enrollmentStatusLabel => 'ស្ថានភាពចុះឈ្មោះ';
+
+  @override
+  String get inactiveLabel => 'អសកម្ម';
+
+  @override
+  String get personalInformationTitle => 'ព័ត៌មានផ្ទាល់ខ្លួន';
+
+  @override
+  String get academicInformationTitle => 'ព័ត៌មានសិក្សា';
+
+  @override
+  String get noEnrollmentRecordTitle => 'គ្មានកំណត់ត្រាចុះឈ្មោះ';
+
+  @override
+  String get noEnrollmentRecordSubtitle =>
+      'មិនទាន់មានកំណត់ត្រាចុះឈ្មោះនៅឡើយទេ។ សូមទាក់ទងអ្នកគ្រប់គ្រង ប្រសិនបើវាមិនត្រឹមត្រូវ។';
+
+  @override
   String get welcomeBack => 'សូមស្វាគមន៍មកវិញ 👋';
 
   @override
@@ -275,6 +345,48 @@ class AppLocalizationsKm extends AppLocalizations {
   String subjectsEnrolledCount(Object count) {
     return 'បានចុះឈ្មោះ $count មុខវិជ្ជា';
   }
+
+  @override
+  String get myClassesTitle => 'ថ្នាក់របស់ខ្ញុំ';
+
+  @override
+  String get notEnrolledInAnyClasses =>
+      'អ្នកមិនទាន់បានចុះឈ្មោះក្នុងថ្នាក់ណាមួយនៅឡើយទេ។';
+
+  @override
+  String get activeLabel => 'សកម្ម';
+
+  @override
+  String get subjectCodeLabel => 'លេខកូដមុខវិជ្ជា';
+
+  @override
+  String get classGroupLabel => 'ក្រុមថ្នាក់';
+
+  @override
+  String get quizzesCompletedLabel => 'តេស្តដែលបានបញ្ចប់';
+
+  @override
+  String get openWorkspace => 'បើកកន្លែងធ្វើការ';
+
+  @override
+  String get newlyPublishedQuizzes => 'តេស្តដែលទើបផ្សព្វផ្សាយថ្មី';
+
+  @override
+  String get newBadgeLabel => 'ថ្មី';
+
+  @override
+  String opensOnLabel(Object date) {
+    return 'បើកនៅ $date';
+  }
+
+  @override
+  String get closedLabel => 'បានបិទ';
+
+  @override
+  String get noAttemptsLeftLabel => 'អស់ចំនួនដងព្យាយាម';
+
+  @override
+  String get startExamLabel => 'ចាប់ផ្ដើមតេស្ត';
 
   @override
   String get completedAssessments => 'ការវាយតម្លៃដែលបានបញ្ចប់';
@@ -617,6 +729,9 @@ class AppLocalizationsKm extends AppLocalizations {
   String get noNotificationsSubtitle => 'អ្នកបានតាមទាន់អស់ហើយ!';
 
   @override
+  String get closeAction => 'បិទ';
+
+  @override
   String get editProfileTitle => 'កែប្រែគណនី';
 
   @override
@@ -663,6 +778,73 @@ class AppLocalizationsKm extends AppLocalizations {
   @override
   String couldntSaveChanges(Object error) {
     return 'មិនអាចរក្សាទុកការផ្លាស់ប្ដូរបានទេ៖ $error';
+  }
+
+  @override
+  String get khmerNameHint => 'ឧ. សុខ វិសាល';
+
+  @override
+  String get phoneHint => '012 345 678';
+
+  @override
+  String get addressHint => 'ផ្លូវ, ក្រុង, ប្រទេស';
+
+  @override
+  String get genderMale => 'ប្រុស';
+
+  @override
+  String get genderFemale => 'ស្រី';
+
+  @override
+  String get selectGenderHint => 'ជ្រើសរើសភេទ';
+
+  @override
+  String get selectDobHint => 'ជ្រើសរើសថ្ងៃខែឆ្នាំកំណើត';
+
+  @override
+  String get changePasswordLabel => 'ប្តូរពាក្យសម្ងាត់';
+
+  @override
+  String get changePasswordSubtitle => 'គ្រប់គ្រងសុវត្ថិភាពគណនីរបស់អ្នក';
+
+  @override
+  String get currentPasswordLabel => 'ពាក្យសម្ងាត់បច្ចុប្បន្ន';
+
+  @override
+  String get currentPasswordHint => 'ពាក្យសម្ងាត់បច្ចុប្បន្ន';
+
+  @override
+  String get newPasswordLabel => 'ពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get newPasswordHint => 'យ៉ាងតិច ៨ តួអក្សរ';
+
+  @override
+  String get confirmNewPasswordLabel => 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី';
+
+  @override
+  String get confirmNewPasswordHint => 'វាយពាក្យសម្ងាត់ថ្មីម្ដងទៀត';
+
+  @override
+  String get updatePasswordButton => 'ធ្វើបច្ចុប្បន្នភាពពាក្យសម្ងាត់';
+
+  @override
+  String get missingPasswordFields => 'សូមបំពេញគ្រប់វាលពាក្យសម្ងាត់ទាំងអស់។';
+
+  @override
+  String get passwordTooShort => 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងតិច ៨ តួអក្សរ។';
+
+  @override
+  String get passwordsDoNotMatch =>
+      'ពាក្យសម្ងាត់ថ្មី និងការបញ្ជាក់ត្រូវតែដូចគ្នា។';
+
+  @override
+  String get passwordChangedMessage =>
+      'ពាក្យសម្ងាត់របស់អ្នកត្រូវបានធ្វើបច្ចុប្បន្នភាព។';
+
+  @override
+  String couldntChangePassword(Object error) {
+    return 'មិនអាចប្ដូរពាក្យសម្ងាត់បានទេ៖ $error';
   }
 
   @override
@@ -835,6 +1017,116 @@ class AppLocalizationsKm extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get myCourseTitle => 'វគ្គសិក្សារបស់ខ្ញុំ';
+
+  @override
+  String get myCourseSubtitle =>
+      'មើលថ្នាក់ដែលអ្នកបានចុះឈ្មោះ ហើយបើកកន្លែងធ្វើការដើម្បីមើលតេស្ត និងលទ្ធផល';
+
+  @override
+  String courseCountLabel(Object filtered, Object total) {
+    return '$filtered នៃ $total មុខវិជ្ជា';
+  }
+
+  @override
+  String get filterClassLabel => 'ថ្នាក់';
+
+  @override
+  String get filterSubjectLabel => 'មុខវិជ្ជា';
+
+  @override
+  String get filterShiftLabel => 'វេន';
+
+  @override
+  String get allClassesFilter => 'ថ្នាក់ទាំងអស់';
+
+  @override
+  String get allSubjectsFilter => 'មុខវិជ្ជាទាំងអស់';
+
+  @override
+  String get allShiftsFilter => 'វេនទាំងអស់';
+
+  @override
+  String get allAcademicYearsFilter => 'ឆ្នាំទាំងអស់';
+
+  @override
+  String get searchCoursesHint => 'មុខវិជ្ជា, ថ្នាក់...';
+
+  @override
+  String get noEnrolledCoursesTitle => 'រកមិនឃើញវគ្គសិក្សាដែលបានចុះឈ្មោះ';
+
+  @override
+  String get noEnrolledCoursesSubtitle =>
+      'អ្នកមិនទាន់បានចុះឈ្មោះក្នុងមុខវិជ្ជាណាមួយសម្រាប់ឆមាសនេះទេ។';
+
+  @override
+  String get noCoursesMatchFilters => 'គ្មានវគ្គសិក្សាត្រូវនឹងតម្រងរបស់អ្នកទេ។';
+
+  @override
+  String get totalQuizzesBoxLabel => 'តេស្តសរុប';
+
+  @override
+  String percentCompleteLabel(Object percent) {
+    return 'បញ្ចប់ $percent%';
+  }
+
+  @override
+  String get viewQuizzesAction => 'មើលតេស្ត';
+
+  @override
+  String teacherPrefixLabel(Object name) {
+    return 'គ្រូបង្រៀន៖ $name';
+  }
+
+  @override
+  String get quizzesTabLabel => 'តេស្ត';
+
+  @override
+  String get resultsTabLabel => 'លទ្ធផល';
+
+  @override
+  String get openNowLabel => 'កំពុងបើក';
+
+  @override
+  String get upcomingLabel => 'ខាងមុខ';
+
+  @override
+  String get noOpenQuizzesForCourse =>
+      'មិនមានតេស្តបើកសម្រាប់វគ្គសិក្សានេះនៅពេលនេះទេ។';
+
+  @override
+  String lastSubmittedLabel(Object date) {
+    return 'ដាក់ស្នើចុងក្រោយ $date';
+  }
+
+  @override
+  String attemptsCountLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ដង',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreOfTotalPercentLabel(Object score, Object total, Object percent) {
+    return '$score / $total ($percent%)';
+  }
+
+  @override
+  String get quizzesScreenTitle => 'តេស្ត';
+
+  @override
+  String get quizzesScreenSubtitle => 'តេស្តទាំងអស់របស់អ្នកនៅគ្រប់ថ្នាក់';
+
+  @override
+  String get searchQuizzesHint => 'ស្វែងរកឈ្មោះតេស្ត...';
+
+  @override
+  String get noQuizzesMatchFilters => 'គ្មានតេស្តត្រូវនឹងតម្រងរបស់អ្នកទេ។';
 
   @override
   String get genericErrorMessage => 'មានបញ្ហាកើតឡើង។ សូមព្យាយាមម្ដងទៀត។';

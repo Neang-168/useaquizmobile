@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release builds block plain http:// traffic by default (Android 9+). The
+  API is only reachable over http:// right now (see ApiConfig.baseUrl), so
+  this carves out a cleartext exception for just that host instead of
+  allowing cleartext traffic app-wide.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">18.142.171.237</domain>
+    </domain-config>
+</network-security-config>

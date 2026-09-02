@@ -18,10 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navSubjects => 'Subjects';
+  String get navSubjects => 'My Course';
 
   @override
-  String get navAssessments => 'Assessments';
+  String get navAssessments => 'Quiz';
 
   @override
   String get navHistory => 'History';
@@ -215,6 +215,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusLabel => 'Status';
 
   @override
+  String get roleLabel => 'Role';
+
+  @override
+  String get joinedLabel => 'Joined';
+
+  @override
+  String get genderLabel => 'Gender';
+
+  @override
+  String get dobLabel => 'Date of Birth';
+
+  @override
+  String get addressLabel => 'Address';
+
+  @override
+  String get khmerNameLabel => 'Khmer Name';
+
+  @override
+  String get facultyLabel => 'Faculty';
+
+  @override
+  String get degreeLabel => 'Degree';
+
+  @override
+  String get departmentLabel => 'Department';
+
+  @override
+  String get semesterLabel => 'Semester';
+
+  @override
+  String get termLabel => 'Term';
+
+  @override
+  String get shiftLabel => 'Shift';
+
+  @override
+  String get stageLabel => 'Stage';
+
+  @override
+  String get promotionLabel => 'Promotion';
+
+  @override
+  String get studentCodeLabel => 'Student Code';
+
+  @override
+  String get admissionDateLabel => 'Admission Date';
+
+  @override
+  String get enrollmentDateLabel => 'Enrollment Date';
+
+  @override
+  String get enrollmentStatusLabel => 'Enrollment Status';
+
+  @override
+  String get inactiveLabel => 'Inactive';
+
+  @override
+  String get personalInformationTitle => 'Personal Information';
+
+  @override
+  String get academicInformationTitle => 'Academic Information';
+
+  @override
+  String get noEnrollmentRecordTitle => 'No Enrollment Record';
+
+  @override
+  String get noEnrollmentRecordSubtitle =>
+      'No enrollment record found yet. Contact your administrator if this looks wrong.';
+
+  @override
   String get welcomeBack => 'Welcome back 👋';
 
   @override
@@ -274,6 +344,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String subjectsEnrolledCount(Object count) {
     return '$count subjects enrolled';
   }
+
+  @override
+  String get myClassesTitle => 'My Classes';
+
+  @override
+  String get notEnrolledInAnyClasses =>
+      'You\'re not enrolled in any classes yet.';
+
+  @override
+  String get activeLabel => 'Active';
+
+  @override
+  String get subjectCodeLabel => 'Subject Code';
+
+  @override
+  String get classGroupLabel => 'Class Group';
+
+  @override
+  String get quizzesCompletedLabel => 'Quizzes Completed';
+
+  @override
+  String get openWorkspace => 'Open Workspace';
+
+  @override
+  String get newlyPublishedQuizzes => 'Newly Published Quizzes';
+
+  @override
+  String get newBadgeLabel => 'New';
+
+  @override
+  String opensOnLabel(Object date) {
+    return 'Opens $date';
+  }
+
+  @override
+  String get closedLabel => 'Closed';
+
+  @override
+  String get noAttemptsLeftLabel => 'No Attempts Left';
+
+  @override
+  String get startExamLabel => 'Start Exam';
 
   @override
   String get completedAssessments => 'Completed Assessments';
@@ -620,6 +732,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noNotificationsSubtitle => 'You\'re all caught up!';
 
   @override
+  String get closeAction => 'Close';
+
+  @override
   String get editProfileTitle => 'Edit Profile';
 
   @override
@@ -666,6 +781,71 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String couldntSaveChanges(Object error) {
     return 'Couldn\'t save changes: $error';
+  }
+
+  @override
+  String get khmerNameHint => 'e.g. សុខ វិសាល';
+
+  @override
+  String get phoneHint => '012 345 678';
+
+  @override
+  String get addressHint => 'Street, city, country';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  @override
+  String get selectGenderHint => 'Select gender';
+
+  @override
+  String get selectDobHint => 'Select date of birth';
+
+  @override
+  String get changePasswordLabel => 'Change Password';
+
+  @override
+  String get changePasswordSubtitle => 'Manage your account security';
+
+  @override
+  String get currentPasswordLabel => 'Current Password';
+
+  @override
+  String get currentPasswordHint => 'Current password';
+
+  @override
+  String get newPasswordLabel => 'New Password';
+
+  @override
+  String get newPasswordHint => 'Minimum 8 characters';
+
+  @override
+  String get confirmNewPasswordLabel => 'Confirm New Password';
+
+  @override
+  String get confirmNewPasswordHint => 'Repeat new password';
+
+  @override
+  String get updatePasswordButton => 'Update Password';
+
+  @override
+  String get missingPasswordFields => 'Please fill in all password fields.';
+
+  @override
+  String get passwordTooShort => 'New password must be at least 8 characters.';
+
+  @override
+  String get passwordsDoNotMatch => 'New password and confirmation must match.';
+
+  @override
+  String get passwordChangedMessage => 'Your password was updated.';
+
+  @override
+  String couldntChangePassword(Object error) {
+    return 'Couldn\'t change password: $error';
   }
 
   @override
@@ -839,6 +1019,117 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get myCourseTitle => 'My Course';
+
+  @override
+  String get myCourseSubtitle =>
+      'Browse your enrolled classes and open a workspace to see quizzes and results';
+
+  @override
+  String courseCountLabel(Object filtered, Object total) {
+    return '$filtered of $total subjects';
+  }
+
+  @override
+  String get filterClassLabel => 'Class';
+
+  @override
+  String get filterSubjectLabel => 'Subject';
+
+  @override
+  String get filterShiftLabel => 'Shift';
+
+  @override
+  String get allClassesFilter => 'All Classes';
+
+  @override
+  String get allSubjectsFilter => 'All Subjects';
+
+  @override
+  String get allShiftsFilter => 'All Shifts';
+
+  @override
+  String get allAcademicYearsFilter => 'All Years';
+
+  @override
+  String get searchCoursesHint => 'Subject, class...';
+
+  @override
+  String get noEnrolledCoursesTitle => 'No Enrolled Courses Found';
+
+  @override
+  String get noEnrolledCoursesSubtitle =>
+      'You\'re not enrolled in any subjects for this semester yet.';
+
+  @override
+  String get noCoursesMatchFilters => 'No courses match your filters.';
+
+  @override
+  String get totalQuizzesBoxLabel => 'Total Quizzes';
+
+  @override
+  String percentCompleteLabel(Object percent) {
+    return '$percent% complete';
+  }
+
+  @override
+  String get viewQuizzesAction => 'View Quizzes';
+
+  @override
+  String teacherPrefixLabel(Object name) {
+    return 'Teacher: $name';
+  }
+
+  @override
+  String get quizzesTabLabel => 'Quizzes';
+
+  @override
+  String get resultsTabLabel => 'Results';
+
+  @override
+  String get openNowLabel => 'Open Now';
+
+  @override
+  String get upcomingLabel => 'Upcoming';
+
+  @override
+  String get noOpenQuizzesForCourse =>
+      'No quizzes are open for this course right now.';
+
+  @override
+  String lastSubmittedLabel(Object date) {
+    return 'Last submitted $date';
+  }
+
+  @override
+  String attemptsCountLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attempts',
+      one: '1 attempt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String scoreOfTotalPercentLabel(Object score, Object total, Object percent) {
+    return '$score / $total ($percent%)';
+  }
+
+  @override
+  String get quizzesScreenTitle => 'Quiz';
+
+  @override
+  String get quizzesScreenSubtitle => 'All your quizzes across every class';
+
+  @override
+  String get searchQuizzesHint => 'Search quiz title...';
+
+  @override
+  String get noQuizzesMatchFilters => 'No quizzes match your filters.';
 
   @override
   String get genericErrorMessage => 'Something went wrong. Please try again.';

@@ -5,8 +5,9 @@ import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/app_repository.dart';
 import '../widgets/common_widgets.dart';
-import 'subjects_screen.dart';
-import 'classrooms_screen.dart';
+import 'my_course_screen.dart';
+import 'quizzes_screen.dart';
+import 'course_workspace_screen.dart';
 import 'assessment_details_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
@@ -26,8 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _pages = const [
     _HomeDashboardBody(),
-    ClassRoomsScreen(embedded: true),
-    _AssessmentsPlaceholder(),
+    MyCourseScreen(embedded: true),
+    QuizzesScreen(embedded: true),
     HistoryScreen(embedded: true),
     ProfileScreen(embedded: true),
   ];
@@ -41,14 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (i) => setState(() => _navIndex = i),
       ),
     );
-  }
-}
-
-class _AssessmentsPlaceholder extends StatelessWidget {
-  const _AssessmentsPlaceholder();
-  @override
-  Widget build(BuildContext context) {
-    return const SubjectsScreen(embedded: true, jumpToAssessments: true);
   }
 }
 
@@ -72,16 +65,15 @@ class _HomeDashboardBodyState extends State<_HomeDashboardBody> {
     final repo = AppRepository.instance;
     final profile = await repo.fetchProfile();
     final stats = await repo.fetchStudentDashboard();
-    final history = await repo.fetchHistory();
     final allAssessments = await repo.fetchAllAssessments();
-    final upcoming = allAssessments.where((a) => !a.isClosed && !a.attemptsExhausted).toList()
-      ..sort((a, b) => (a.endAt ?? '').compareTo(b.endAt ?? ''));
+    final classes = await repo.fetchSubjects();
+    final unreadNotifications = await repo.fetchUnreadNotificationsCount();
     final progress = AssessmentProgress.fromAssessments(allAssessments);
     return _DashboardData(
       studentName: profile.name,
       stats: stats,
-      history: history,
-      upcoming: upcoming,
+      classes: classes,
+      unreadNotifications: unreadNotifications,
       progress: progress,
     );
   }
@@ -118,12 +110,18 @@ class _HomeDashboardBodyState extends State<_HomeDashboardBody> {
           );
         }
         if (snapshot.hasError) {
-          return ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          return ErrorStateView(
+            message: describeApiError(snapshot.error!),
+            onRetry: _retry,
+          );
         }
         return RefreshIndicator(
           onRefresh: _refresh,
           color: AppColors.primary,
-          child: _DashboardBody(data: snapshot.data!),
+          child: _DashboardBody(
+            data: snapshot.data!,
+            onNotificationsChanged: _retry,
+          ),
         );
       },
     );
@@ -133,14 +131,14 @@ class _HomeDashboardBodyState extends State<_HomeDashboardBody> {
 class _DashboardData {
   final String studentName;
   final StudentDashboardStats stats;
-  final List<HistoryItem> history;
-  final List<Assessment> upcoming;
+  final List<Subject> classes;
+  final int unreadNotifications;
   final AssessmentProgress progress;
   _DashboardData({
     required this.studentName,
     required this.stats,
-    required this.history,
-    required this.upcoming,
+    required this.classes,
+    required this.unreadNotifications,
     required this.progress,
   });
 }
@@ -158,7 +156,11 @@ String _initials(String name) {
 
 class _DashboardBody extends StatelessWidget {
   final _DashboardData data;
-  const _DashboardBody({required this.data});
+  final VoidCallback onNotificationsChanged;
+  const _DashboardBody({
+    required this.data,
+    required this.onNotificationsChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -234,9 +236,12 @@ class _DashboardBody extends StatelessWidget {
               ),
             ),
             GestureDetector(
-              onTap: () => Navigator.of(
-                context,
-              ).push(fadeRoute(const NotificationsScreen())),
+              onTap: () async {
+                await Navigator.of(
+                  context,
+                ).push(fadeRoute(const NotificationsScreen()));
+                if (context.mounted) onNotificationsChanged();
+              },
               child: Container(
                 width: 46,
                 height: 46,
@@ -258,18 +263,38 @@ class _DashboardBody extends StatelessWidget {
                       Icons.notifications_none_rounded,
                       color: AppColors.textPrimary,
                     ),
-                    Positioned(
-                      top: 11,
-                      right: 12,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.danger,
-                          shape: BoxShape.circle,
+                    if (data.unreadNotifications > 0)
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          constraints: const BoxConstraints(
+                            minWidth: 17,
+                            minHeight: 17,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.danger,
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            border: Border.all(
+                              color: AppColors.surface,
+                              width: 1.5,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            data.unreadNotifications > 9
+                                ? '9+'
+                                : '${data.unreadNotifications}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              height: 1,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -293,7 +318,10 @@ class _DashboardBody extends StatelessWidget {
                   children: [
                     Text(
                       l.yourLearningProgress,
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -330,7 +358,10 @@ class _DashboardBody extends StatelessWidget {
                         totalAssessments == 0
                             ? l.noAssessmentsAssignedYet
                             : l.allCaughtUpNothingDue,
-                        style: const TextStyle(color: Colors.white70, fontSize: 12.5),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12.5,
+                        ),
                       ),
                   ],
                 ),
@@ -390,212 +421,237 @@ class _DashboardBody extends StatelessWidget {
           ),
         const SizedBox(height: 26),
 
-        SectionHeader(title: l.announcementsTitle),
+        SectionHeader(
+          title: l.myClassesTitle,
+          actionLabel: l.viewAll,
+          onAction: () =>
+              Navigator.of(context).push(fadeRoute(const MyCourseScreen())),
+        ),
         const SizedBox(height: 12),
-        if (data.stats.announcements.isEmpty)
-          EmptyState(
-            icon: Icons.campaign_outlined,
-            title: l.noAnnouncements,
-            subtitle: l.noAnnouncementsSubtitle,
+        if (data.classes.isEmpty)
+          Text(
+            l.notEnrolledInAnyClasses,
+            style: Theme.of(context).textTheme.bodyMedium,
           )
         else
-          ...data.stats.announcements
-              .take(3)
+          ...data.classes
+              .take(2)
               .map(
-                (a) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: softCardDecoration(),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        IconBadge(
-                          icon: Icons.campaign_rounded,
-                          color: AppColors.accent,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                a.message,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${a.teacherName} · ${a.time}',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                (s) => _ClassCard(
+                  subject: s,
+                  onTap: () => Navigator.of(context).push(
+                    fadeRoute(
+                      CourseWorkspaceScreen(
+                        classId: s.classId,
+                        subjectId: s.id,
+                        subjectName: s.name,
+                        className: s.className,
+                        subjectIcon: s.icon,
+                        subjectColor: s.color,
+                      ),
                     ),
                   ),
                 ),
               ),
         const SizedBox(height: 26),
 
+        if (data.stats.recentQuizzes.isNotEmpty) ...[
+          SectionHeader(
+            title: l.newlyPublishedQuizzes,
+            actionLabel: l.viewAll,
+            onAction: () =>
+                Navigator.of(context).push(fadeRoute(const QuizzesScreen())),
+          ),
+          const SizedBox(height: 12),
+          ...data.stats.recentQuizzes
+              .take(2)
+              .map(
+                (q) => QuizCard(
+                  icon: q.icon,
+                  color: q.color,
+                  title: q.title,
+                  subjectLabel: '${q.subject} · ${q.className}',
+                  duration: q.duration,
+                  totalQuestions: q.totalQuestions,
+                  isUpcoming: q.isUpcoming,
+                  isClosed: q.isClosed,
+                  attemptsExhausted: q.attemptsExhausted,
+                  startAt: q.startAt,
+                  showNewBadge: true,
+                  onTap: () => Navigator.of(context).push(
+                    fadeRoute(AssessmentDetailsScreen(assessmentId: q.id)),
+                  ),
+                ),
+              ),
+          const SizedBox(height: 26),
+        ],
+
         SectionHeader(
-          title: l.upcomingAssessments,
-          actionLabel: l.seeAll,
-          onAction: () => Navigator.of(
-            context,
-          ).push(fadeRoute(const SubjectsScreen(jumpToAssessments: true))),
+          title: l.scheduleSectionTitle,
+          actionLabel: l.viewAll,
+          onAction: () =>
+              Navigator.of(context).push(fadeRoute(const ScheduleScreen())),
         ),
         const SizedBox(height: 12),
-        if (data.upcoming.isEmpty)
-          EmptyState(
-            icon: Icons.event_available_outlined,
-            title: l.allCaughtUp,
-            subtitle: l.noUpcomingSubtitle,
-          )
-        else
-          ...data.upcoming.map(
-            (a) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: softCardDecoration(),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  onTap: () => Navigator.of(context).push(
-                    fadeRoute(AssessmentDetailsScreen(assessmentId: a.id)),
+        const ScheduleScreen(embedded: true),
+      ],
+    );
+  }
+}
+
+/// One "My Classes" card — mirrors the web dashboard's class card (code
+/// badge, active tag, subject/class metadata, quizzes-completed progress
+/// bar, "Open Workspace" action).
+class _ClassCard extends StatelessWidget {
+  final Subject subject;
+  final VoidCallback onTap;
+  const _ClassCard({required this.subject, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final total = subject.totalAssessments;
+    final completed = subject.completed;
+    final progress = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: softCardDecoration(),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
                   ),
-                  child: Row(
-                    children: [
-                      IconBadge(icon: a.icon, color: a.color),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              a.subject,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.timer_outlined,
-                                  size: 14,
-                                  color: AppColors.textMuted,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    l.durationQuestionsDue(
-                                      a.duration,
-                                      a.totalQuestions,
-                                      a.endAt != null ? l.dueSuffix(formatDisplayDate(a.endAt, withTime: true)) : '',
-                                    ),
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textMuted,
-                      ),
-                    ],
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
+                  child: Text(
+                    subject.code,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 11.5,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                StatusPill(label: l.activeLabel, color: AppColors.success),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(subject.name, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 2),
+            Text(
+              subject.className,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: AppColors.border),
+                  bottom: BorderSide(color: AppColors.border),
+                ),
+              ),
+              child: Column(
+                children: [
+                  _metaRow(
+                    context,
+                    Icons.menu_book_rounded,
+                    l.subjectCodeLabel,
+                    subject.code,
+                  ),
+                  const SizedBox(height: 8),
+                  _metaRow(
+                    context,
+                    Icons.groups_rounded,
+                    l.classGroupLabel,
+                    subject.className,
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l.quizzesCompletedLabel,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  '$completed/$total',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: AppColors.border,
+                valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.folder_open_rounded, size: 18),
+                label: Text(l.openWorkspace),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
               ),
             ),
-          ),
-        const SizedBox(height: 26),
+          ],
+        ),
+      ),
+    );
+  }
 
-        SectionHeader(
-          title: l.enrolledSubjects,
-          actionLabel: l.viewAll,
-          onAction: () =>
-              Navigator.of(context).push(fadeRoute(const SubjectsScreen())),
+  Widget _metaRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 14, color: AppColors.accent),
+            const SizedBox(width: 6),
+            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          ],
         ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: softCardDecoration(),
-          child: Row(
-            children: [
-              IconBadge(
-                icon: Icons.menu_book_rounded,
-                color: AppColors.primary,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  l.subjectsEnrolledCount(data.stats.enrolledSubjectsCount),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ],
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+            fontSize: 12.5,
           ),
         ),
-        const SizedBox(height: 26),
-
-        SectionHeader(
-          title: l.completedAssessments,
-          actionLabel: l.historyAction,
-          onAction: () {},
-        ),
-        const SizedBox(height: 12),
-        if (data.history.isEmpty)
-          EmptyState(
-            icon: Icons.description_outlined,
-            title: l.noCompletedYet,
-            subtitle: l.noCompletedYetSubtitle,
-          )
-        else
-          ...data.history
-              .take(2)
-              .map(
-                (h) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: softCardDecoration(),
-                    child: Row(
-                      children: [
-                        IconBadge(
-                          icon: Icons.check_circle_rounded,
-                          color: h.color,
-                          size: 42,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                h.quizTitle.isNotEmpty
-                                    ? h.quizTitle
-                                    : h.subject,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                formatDisplayDate(h.submittedAt),
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
-                        ),
-                        StatusPill(
-                          label: '${h.percentage.round()}%',
-                          color: h.color,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
       ],
     );
   }

@@ -5,7 +5,8 @@ import '../l10n/generated/app_localizations.dart';
 /// Model-layer code has no [BuildContext] to call `AppLocalizations.of`, so
 /// it looks the current translation up directly from [LocaleController]'s
 /// locale instead — same live-updating source the widget tree itself reads.
-AppLocalizations get _l => lookupAppLocalizations(LocaleController.locale.value);
+AppLocalizations get _l =>
+    lookupAppLocalizations(LocaleController.locale.value);
 
 /// The live API never sends icon/color strings for any entity — these are
 /// derived client-side from stable identifiers (subject code, notification
@@ -92,7 +93,9 @@ String formatDisplayDate(String? iso, {bool withTime = false}) {
   if (iso == null || iso.isEmpty) return '';
   final dt = DateTime.tryParse(iso);
   if (dt == null) return iso;
-  final months = LocaleController.locale.value.languageCode == 'km' ? _monthsKm : _months;
+  final months = LocaleController.locale.value.languageCode == 'km'
+      ? _monthsKm
+      : _months;
   final date = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   if (!withTime) return date;
   final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
@@ -158,6 +161,8 @@ class Subject {
   final String code;
   final String className; // enrolled/assigned class name(s)
   final String teacher; // student-only
+  final String shift; // student-only
+  final String academicYear; // student-only
   final IconData icon;
   final Color color;
   final int totalAssessments;
@@ -170,6 +175,8 @@ class Subject {
     required this.code,
     this.className = '',
     this.teacher = '',
+    this.shift = '',
+    this.academicYear = '',
     required this.icon,
     required this.color,
     this.totalAssessments = 0,
@@ -183,6 +190,8 @@ class Subject {
     code: j['code'] ?? '',
     className: j['className'] ?? '',
     teacher: j['teacher'] ?? '',
+    shift: j['shift'] ?? '',
+    academicYear: j['academicYear'] ?? '',
     icon: iconForSubjectCode(j['code']),
     color: colorForSeed('${j['code'] ?? j['id']}'),
     totalAssessments: j['totalQuizzes'] ?? 0,
@@ -487,7 +496,10 @@ class AssessmentProgress {
 
   factory AssessmentProgress.fromAssessments(List<Assessment> all) {
     final completed = all.where((a) => a.lastSubmittedAt != null).length;
-    return AssessmentProgress(completed: completed, todo: all.length - completed);
+    return AssessmentProgress(
+      completed: completed,
+      todo: all.length - completed,
+    );
   }
 }
 
@@ -536,55 +548,117 @@ class SubmissionResult {
   );
 }
 
-/// `/me` — flat, shared by both Student and Teacher; role-specific data
-/// (faculty/major/academic year, department, etc.) lives on separate
-/// profile tables the mobile app has no route to fetch directly, so the
-/// repository fills in what it can from the student's own course list.
+/// `GET /me` for a Student account — the flat account fields plus the
+/// read-only `studentProfile`/`enrollment` block Laravel nests alongside
+/// them (student code, admission date, and the student's latest enrollment:
+/// class, major, faculty, degree, academic year, semester, term, shift,
+/// stage, promotion).
 class Student {
   final String id;
   final String username;
   final String firstName;
   final String lastName;
+  final String nameKh;
   final String email;
-  final String? major;
+  final String gender;
+  final String? dob; // 'Y-m-d'
+  final String phone;
+  final String address;
+  final String? avatarUrl;
+  final bool status;
+  final String? createdAt;
+  final String role;
+
+  // Read-only academic info, from `studentProfile`/`studentProfile.enrollment`.
+  final String? studentCode;
+  final String? admissionDate;
   final String? className;
+  final String? major;
+  final String? faculty;
+  final String? degree;
+  final String? department;
   final String? academicYear;
+  final String? semester;
+  final String? term;
+  final String? shift;
+  final String? stage;
+  final String? promotion;
+  final String? enrollmentDate;
+  final String? enrollmentStatus;
 
   const Student({
     required this.id,
     required this.username,
     required this.firstName,
     required this.lastName,
+    this.nameKh = '',
     required this.email,
-    this.major,
+    this.gender = '',
+    this.dob,
+    this.phone = '',
+    this.address = '',
+    this.avatarUrl,
+    this.status = true,
+    this.createdAt,
+    this.role = '',
+    this.studentCode,
+    this.admissionDate,
     this.className,
+    this.major,
+    this.faculty,
+    this.degree,
+    this.department,
     this.academicYear,
+    this.semester,
+    this.term,
+    this.shift,
+    this.stage,
+    this.promotion,
+    this.enrollmentDate,
+    this.enrollmentStatus,
   });
 
   String get name => '$firstName $lastName'.trim();
 
-  factory Student.fromJson(Map<String, dynamic> j) => Student(
-    id: '${j['id']}',
-    username: j['username'] ?? '',
-    firstName: j['first_name'] ?? '',
-    lastName: j['last_name'] ?? '',
-    email: j['email'] ?? '',
-  );
+  /// Whether this account has an enrollment record to show academic info
+  /// for — false for a Student user whose enrollment hasn't been set up yet.
+  bool get hasEnrollment => className != null;
 
-  Student copyWithCourse({
-    String? major,
-    String? className,
-    String? academicYear,
-  }) => Student(
-    id: id,
-    username: username,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    major: major,
-    className: className,
-    academicYear: academicYear,
-  );
+  factory Student.fromJson(Map<String, dynamic> j) {
+    final studentProfile = j['studentProfile'] as Map?;
+    final enrollment = studentProfile?['enrollment'] as Map?;
+    return Student(
+      id: '${j['id']}',
+      username: j['username'] ?? '',
+      firstName: j['first_name'] ?? '',
+      lastName: j['last_name'] ?? '',
+      nameKh: j['name_kh'] ?? '',
+      email: j['email'] ?? '',
+      gender: j['gender'] ?? '',
+      dob: j['dob'],
+      phone: j['phone'] ?? '',
+      address: j['address'] ?? '',
+      avatarUrl: j['avatar_url'],
+      status: j['status'] == true || j['status'] == 1,
+      createdAt: j['created_at'],
+      role: j['role'] ?? '',
+      studentCode: studentProfile?['student_code'],
+      admissionDate: studentProfile?['admission_date'],
+      className: enrollment?['class_name'],
+      major: enrollment?['major_name'],
+      faculty: enrollment?['faculty_name'],
+      degree: enrollment?['degree_name'],
+      department: enrollment?['department_name'],
+      academicYear: enrollment?['academic_year_name'],
+      semester: enrollment?['semester_name'],
+      term: enrollment?['term_name'],
+      shift: enrollment?['shift_name'],
+      stage: enrollment?['stage_name'],
+      promotion: enrollment?['promotion_name'],
+      enrollmentDate: enrollment?['enrollment_date'],
+      enrollmentStatus: enrollment?['status'],
+    );
+  }
 }
 
 enum UserRole { student, teacher }

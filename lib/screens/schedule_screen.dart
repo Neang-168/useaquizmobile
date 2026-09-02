@@ -10,7 +10,8 @@ import '../l10n/generated/app_localizations.dart';
 /// by both roles — [AppRepository.fetchSchedule] internally picks
 /// `/teacher/calendar` or `/student/calendar` based on the logged-in role.
 class ScheduleScreen extends StatefulWidget {
-  const ScheduleScreen({super.key});
+  final bool embedded;
+  const ScheduleScreen({super.key, this.embedded = false});
 
   @override
   State<ScheduleScreen> createState() => _ScheduleScreenState();
@@ -53,53 +54,62 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final futureBuilder = FutureBuilder<List<ScheduleItem>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Padding(
+            padding: widget.embedded
+                ? EdgeInsets.zero
+                : const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: const Column(
+              children: [
+                SkeletonBox(height: 360, radius: 20),
+                SizedBox(height: 24),
+                SkeletonBox(height: 100, radius: 20),
+              ],
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return ErrorStateView(
+            message: describeApiError(snapshot.error!),
+            onRetry: _retry,
+          );
+        }
+        final items = snapshot.data!;
+        final content = [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: softCardDecoration(),
+            child: _CalendarGrid(
+              displayedMonth: _displayedMonth,
+              selectedDay: _selectedDay,
+              hasItemsOn: (day) => items.any((i) => i.coversDate(day)),
+              onPrevMonth: () => _changeMonth(-1),
+              onNextMonth: () => _changeMonth(1),
+              onSelectDay: _selectDay,
+            ),
+          ),
+          const SizedBox(height: 26),
+          if (!widget.embedded) ...[
+            SectionHeader(title: l.scheduleSectionTitle),
+            const SizedBox(height: 12),
+          ],
+          ..._scheduleList(context, items),
+        ];
+        if (widget.embedded) return Column(children: content);
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          children: content,
+        );
+      },
+    );
+
+    if (widget.embedded) return futureBuilder;
     return Scaffold(
       appBar: AppBar(title: Text(l.scheduleAppBarTitle)),
-      body: SafeArea(
-        child: FutureBuilder<List<ScheduleItem>>(
-          future: _future,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                children: const [
-                  SkeletonBox(height: 360, radius: 20),
-                  SizedBox(height: 24),
-                  SkeletonBox(height: 100, radius: 20),
-                ],
-              );
-            }
-            if (snapshot.hasError) {
-              return ErrorStateView(
-                message: describeApiError(snapshot.error!),
-                onRetry: _retry,
-              );
-            }
-            final items = snapshot.data!;
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: softCardDecoration(),
-                  child: _CalendarGrid(
-                    displayedMonth: _displayedMonth,
-                    selectedDay: _selectedDay,
-                    hasItemsOn: (day) => items.any((i) => i.coversDate(day)),
-                    onPrevMonth: () => _changeMonth(-1),
-                    onNextMonth: () => _changeMonth(1),
-                    onSelectDay: _selectDay,
-                  ),
-                ),
-                const SizedBox(height: 26),
-                SectionHeader(title: l.scheduleSectionTitle),
-                const SizedBox(height: 12),
-                ..._scheduleList(context, items),
-              ],
-            );
-          },
-        ),
-      ),
+      body: SafeArea(child: futureBuilder),
     );
   }
 
@@ -155,10 +165,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                formatDisplayDate(
-                                  item.startAt,
-                                  withTime: true,
-                                ),
+                                formatDisplayDate(item.startAt, withTime: true),
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
@@ -238,11 +245,7 @@ class _CalendarGrid extends StatelessWidget {
     final isKhmer = Localizations.localeOf(context).languageCode == 'km';
     final weekdayLabels = isKhmer ? _weekdayLabelsKm : _weekdayLabels;
     final monthNames = isKhmer ? _monthNamesKm : _monthNames;
-    final firstOfMonth = DateTime(
-      displayedMonth.year,
-      displayedMonth.month,
-      1,
-    );
+    final firstOfMonth = DateTime(displayedMonth.year, displayedMonth.month, 1);
     final daysInMonth = DateTime(
       displayedMonth.year,
       displayedMonth.month + 1,

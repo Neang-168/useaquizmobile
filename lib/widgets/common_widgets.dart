@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../theme/app_theme.dart';
+import '../models/models.dart';
 import '../l10n/generated/app_localizations.dart';
 
 typedef BottomNavItem = ({IconData icon, String label});
@@ -12,15 +13,20 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<BottomNavItem>? items;
-  const AppBottomNav({super.key, required this.currentIndex, required this.onTap, this.items});
+  const AppBottomNav({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+    this.items,
+  });
 
   List<BottomNavItem> _defaultItems(AppLocalizations l) => [
-        (icon: Icons.home_rounded, label: l.navHome),
-        (icon: Icons.menu_book_rounded, label: l.navSubjects),
-        (icon: Icons.fact_check_rounded, label: l.navAssessments),
-        (icon: Icons.history_rounded, label: l.navHistory),
-        (icon: Icons.person_rounded, label: l.navProfile),
-      ];
+    (icon: Icons.home_rounded, label: l.navHome),
+    (icon: Icons.menu_book_rounded, label: l.navSubjects),
+    (icon: Icons.fact_check_rounded, label: l.navAssessments),
+    (icon: Icons.history_rounded, label: l.navHistory),
+    (icon: Icons.person_rounded, label: l.navProfile),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +34,13 @@ class AppBottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 20, offset: const Offset(0, -4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: SafeArea(
@@ -43,22 +55,33 @@ class AppBottomNav extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: active ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent,
+                  color: active
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(item.icon, color: active ? AppColors.primary : AppColors.textMuted, size: 24),
+                    Icon(
+                      item.icon,
+                      color: active ? AppColors.primary : AppColors.textMuted,
+                      size: 24,
+                    ),
                     const SizedBox(height: 3),
-                    Text(item.label,
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                          color: active ? AppColors.primary : AppColors.textMuted,
-                        )),
+                    Text(
+                      item.label,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                        color: active ? AppColors.primary : AppColors.textMuted,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -74,7 +97,12 @@ class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
   final VoidCallback? onAction;
-  const SectionHeader({super.key, required this.title, this.actionLabel, this.onAction});
+  const SectionHeader({
+    super.key,
+    required this.title,
+    this.actionLabel,
+    this.onAction,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +113,14 @@ class SectionHeader extends StatelessWidget {
         if (actionLabel != null)
           GestureDetector(
             onTap: onAction,
-            child: Text(actionLabel!,
-                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13.5)),
+            child: Text(
+              actionLabel!,
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13.5,
+              ),
+            ),
           ),
       ],
     );
@@ -102,8 +136,18 @@ class StatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.pill)),
-      child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 11.5)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 11.5,
+        ),
+      ),
     );
   }
 }
@@ -112,14 +156,22 @@ class IconBadge extends StatelessWidget {
   final IconData icon;
   final Color color;
   final double size;
-  const IconBadge({super.key, required this.icon, required this.color, this.size = 46});
+  const IconBadge({
+    super.key,
+    required this.icon,
+    required this.color,
+    this.size = 46,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(AppRadius.sm)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
       child: Icon(icon, color: color, size: size * 0.5),
     );
   }
@@ -132,7 +184,13 @@ class StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  const StatCard({super.key, required this.icon, required this.label, required this.value, required this.color});
+  const StatCard({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -150,13 +208,28 @@ class StatCard extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.16), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(height: 10),
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );
@@ -168,14 +241,22 @@ class SkeletonBox extends StatelessWidget {
   final double height;
   final double? width;
   final double radius;
-  const SkeletonBox({super.key, required this.height, this.width, this.radius = AppRadius.sm});
+  const SkeletonBox({
+    super.key,
+    required this.height,
+    this.width,
+    this.radius = AppRadius.sm,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: height,
       width: width,
-      decoration: BoxDecoration(color: AppColors.skeleton, borderRadius: BorderRadius.circular(radius)),
+      decoration: BoxDecoration(
+        color: AppColors.skeleton,
+        borderRadius: BorderRadius.circular(radius),
+      ),
     );
   }
 }
@@ -184,7 +265,12 @@ class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  const EmptyState({super.key, required this.icon, required this.title, required this.subtitle});
+  const EmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -195,15 +281,20 @@ class EmptyState extends StatelessWidget {
           Container(
             width: 84,
             height: 84,
-            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.08), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
             child: Icon(icon, size: 38, color: AppColors.primary),
           ),
           const SizedBox(height: 16),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 6),
-          Text(subtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ],
       ),
     );
@@ -216,7 +307,11 @@ class EmptyState extends StatelessWidget {
 class ErrorStateView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const ErrorStateView({super.key, required this.message, required this.onRetry});
+  const ErrorStateView({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -227,15 +322,29 @@ class ErrorStateView extends StatelessWidget {
           Container(
             width: 84,
             height: 84,
-            decoration: BoxDecoration(color: AppColors.danger.withValues(alpha: 0.08), shape: BoxShape.circle),
-            child: const Icon(Icons.cloud_off_rounded, size: 38, color: AppColors.danger),
+            decoration: BoxDecoration(
+              color: AppColors.danger.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.cloud_off_rounded,
+              size: 38,
+              color: AppColors.danger,
+            ),
           ),
           const SizedBox(height: 16),
-          Text(AppLocalizations.of(context).couldntLoadThis, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            AppLocalizations.of(context).couldntLoadThis,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(message, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -274,17 +383,29 @@ class BrandHeaderBar extends StatelessWidget {
                   width: 42,
                   height: 42,
                   padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(11)),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(11),
+                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7),
-                    child: Image.asset('assets/usealogo.jpg', fit: BoxFit.contain),
+                    child: Image.asset(
+                      'assets/usealogo.jpg',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     AppLocalizations.of(context).universityName,
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700, height: 1.3, letterSpacing: 0.3),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                      letterSpacing: 0.3,
+                    ),
                   ),
                 ),
                 GestureDetector(
@@ -295,10 +416,20 @@ class BrandHeaderBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.14),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.55), width: 1.5),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.55),
+                        width: 1.5,
+                      ),
                     ),
                     child: Center(
-                      child: Text(initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -356,9 +487,15 @@ class GaugeStatCard extends StatelessWidget {
                 backgroundColor: AppColors.skeleton,
                 progressColor: AppColors.primary,
                 circularStrokeCap: CircularStrokeCap.round,
-                center: Text(centerLabel,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary)),
+                center: Text(
+                  centerLabel,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
               const SizedBox(width: 20),
               Expanded(
@@ -370,7 +507,10 @@ class GaugeStatCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     _LegendDot(color: AppColors.primary, label: doneLabel),
                     const SizedBox(height: 8),
-                    _LegendDot(color: AppColors.skeleton, label: remainingLabel),
+                    _LegendDot(
+                      color: AppColors.skeleton,
+                      label: remainingLabel,
+                    ),
                   ],
                 ),
               ),
@@ -391,11 +531,20 @@ class _LegendDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
         ),
       ],
     );
@@ -407,7 +556,12 @@ class ShortcutTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const ShortcutTile({super.key, required this.icon, required this.label, required this.onTap});
+  const ShortcutTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +575,11 @@ class ShortcutTile extends StatelessWidget {
           children: [
             IconBadge(icon: icon, color: AppColors.primary, size: 46),
             const SizedBox(height: 10),
-            Text(label, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ],
         ),
       ),
@@ -442,16 +600,18 @@ class ShortcutGrid extends StatelessWidget {
     for (var i = 0; i < tiles.length; i += 2) {
       final hasSecond = i + 1 < tiles.length;
       if (rows.isNotEmpty) rows.add(const SizedBox(height: 12));
-      rows.add(IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: tiles[i]),
-            const SizedBox(width: 12),
-            Expanded(child: hasSecond ? tiles[i + 1] : const SizedBox()),
-          ],
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: tiles[i]),
+              const SizedBox(width: 12),
+              Expanded(child: hasSecond ? tiles[i + 1] : const SizedBox()),
+            ],
+          ),
         ),
-      ));
+      );
     }
     return Column(children: rows);
   }
@@ -495,7 +655,13 @@ class ProfileDetailsCard extends StatelessWidget {
           child: Text(row.label, style: Theme.of(context).textTheme.bodyMedium),
         ),
         const SizedBox(width: 8),
-        Expanded(child: Text(row.value, textAlign: TextAlign.end, style: Theme.of(context).textTheme.titleMedium)),
+        Expanded(
+          child: Text(
+            row.value,
+            textAlign: TextAlign.end,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
       ],
     );
   }
@@ -507,8 +673,13 @@ class SettingsSwitchTile extends StatelessWidget {
   final String label;
   final bool value;
   final ValueChanged<bool> onChanged;
-  const SettingsSwitchTile(
-      {super.key, required this.icon, required this.label, required this.value, required this.onChanged});
+  const SettingsSwitchTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -518,8 +689,14 @@ class SettingsSwitchTile extends StatelessWidget {
         children: [
           IconBadge(icon: icon, color: AppColors.primary, size: 38),
           const SizedBox(width: 12),
-          Expanded(child: Text(label, style: Theme.of(context).textTheme.titleMedium)),
-          Switch(value: value, activeThumbColor: AppColors.primary, onChanged: onChanged),
+          Expanded(
+            child: Text(label, style: Theme.of(context).textTheme.titleMedium),
+          ),
+          Switch(
+            value: value,
+            activeThumbColor: AppColors.primary,
+            onChanged: onChanged,
+          ),
         ],
       ),
     );
@@ -532,7 +709,12 @@ class SettingsNavTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const SettingsNavTile({super.key, required this.icon, required this.label, required this.onTap});
+  const SettingsNavTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -550,16 +732,30 @@ class SettingsNavTile extends StatelessWidget {
 class LogoutButton extends StatelessWidget {
   final bool loading;
   final VoidCallback? onPressed;
-  const LogoutButton({super.key, required this.loading, required this.onPressed});
+  const LogoutButton({
+    super.key,
+    required this.loading,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(foregroundColor: AppColors.danger, side: const BorderSide(color: AppColors.danger)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.danger,
+        side: const BorderSide(color: AppColors.danger),
+      ),
       onPressed: loading ? null : onPressed,
       icon: loading
-          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.danger))
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.danger,
+              ),
+            )
           : const Icon(Icons.logout_rounded, size: 18),
       label: Text(loading ? l.loggingOut : l.logOut),
     );
@@ -569,7 +765,220 @@ class LogoutButton extends StatelessWidget {
 PageRoute<T> fadeRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
     pageBuilder: (_, __, ___) => page,
-    transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+    transitionsBuilder: (_, anim, __, child) =>
+        FadeTransition(opacity: anim, child: child),
     transitionDuration: const Duration(milliseconds: 260),
   );
+}
+
+/// One quiz card — mirrors the web app's quiz card (optional "New" badge,
+/// subject/class metadata, duration/questions, and a status pill for Start
+/// Exam / Opens soon / Closed / No Attempts Left). Shared by the home
+/// dashboard's "Newly Published Quizzes" and the standalone Quiz list, which
+/// source it from different models ([StudentQuizSummary] vs [Assessment]) —
+/// so this takes plain fields rather than either model directly.
+class QuizCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subjectLabel; // "{subject} · {className}"
+  final int duration;
+  final int totalQuestions;
+  final bool isUpcoming;
+  final bool isClosed;
+  final bool attemptsExhausted;
+  final String? startAt;
+  final bool showNewBadge;
+  final VoidCallback onTap;
+
+  const QuizCard({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subjectLabel,
+    required this.duration,
+    required this.totalQuestions,
+    required this.isUpcoming,
+    required this.isClosed,
+    required this.attemptsExhausted,
+    this.startAt,
+    this.showNewBadge = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final String statusLabel;
+    final Color statusColor;
+    if (isUpcoming) {
+      statusLabel = l.opensOnLabel(formatDisplayDate(startAt, withTime: true));
+      statusColor = AppColors.textMuted;
+    } else if (isClosed) {
+      statusLabel = l.closedLabel;
+      statusColor = AppColors.textMuted;
+    } else if (attemptsExhausted) {
+      statusLabel = l.noAttemptsLeftLabel;
+      statusColor = AppColors.textMuted;
+    } else {
+      statusLabel = l.startExamLabel;
+      statusColor = AppColors.primary;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: softCardDecoration(),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconBadge(icon: icon, color: color, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (showNewBadge)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                          child: Text(
+                            l.newBadgeLabel,
+                            style: const TextStyle(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10.5,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        subjectLabel,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 14,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$duration min',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(width: 14),
+                Icon(
+                  Icons.list_alt_rounded,
+                  size: 14,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$totalQuestions qs',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: statusColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+              child: Text(
+                statusLabel,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// One dropdown in a filter bar (Class / Subject / Shift / Academic Year,
+/// etc.) — `null` always means "All", shown as [allLabel].
+class FilterDropdown extends StatelessWidget {
+  final String label;
+  final String? value;
+  final List<String> options;
+  final String allLabel;
+  final ValueChanged<String?> onChanged;
+
+  const FilterDropdown({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.allLabel,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // The selected value can fall out of [options] when the underlying data
+    // reloads (e.g. a pull-to-refresh) — fall back to "All" rather than
+    // asserting, since DropdownButtonFormField requires its value to be one
+    // of its items.
+    final safeValue = value != null && options.contains(value) ? value : null;
+    return DropdownButtonFormField<String?>(
+      initialValue: safeValue,
+      isExpanded: true,
+      isDense: true,
+      decoration: InputDecoration(
+        labelText: label,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 10,
+        ),
+      ),
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13.5),
+      items: [
+        DropdownMenuItem<String?>(
+          value: null,
+          child: Text(allLabel, overflow: TextOverflow.ellipsis),
+        ),
+        ...options.map(
+          (o) => DropdownMenuItem<String?>(
+            value: o,
+            child: Text(o, overflow: TextOverflow.ellipsis),
+          ),
+        ),
+      ],
+      onChanged: onChanged,
+    );
+  }
 }

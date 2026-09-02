@@ -18,8 +18,9 @@ class ApiException implements Exception {
 
 /// Human-readable text for an error caught from a repository call —
 /// used by screens to populate an [ErrorStateView].
-String describeApiError(Object error) =>
-    error is ApiException ? error.message : LocaleController.l.genericErrorMessage;
+String describeApiError(Object error) => error is ApiException
+    ? error.message
+    : LocaleController.l.genericErrorMessage;
 
 /// Thin wrapper around package:http that adds base URL, auth header,
 /// timeouts, and consistent JSON/error handling.
@@ -35,7 +36,10 @@ class ApiClient {
   bool _handling401 = false;
 
   Future<Map<String, String>> _headers({bool auth = true}) async {
-    final headers = {'Content-Type': 'application/json', 'Accept': 'application/json'};
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
     if (auth) {
       final token = await Session.loadToken();
       if (token != null) headers['Authorization'] = 'Bearer $token';
@@ -45,21 +49,62 @@ class ApiClient {
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final clean = path.startsWith('/') ? path.substring(1) : path;
-    return Uri.parse('${ApiConfig.baseUrl}/$clean').replace(
-      queryParameters: query?.map((k, v) => MapEntry(k, '$v')),
+    return Uri.parse(
+      '${ApiConfig.baseUrl}/$clean',
+    ).replace(queryParameters: query?.map((k, v) => MapEntry(k, '$v')));
+  }
+
+  Future<dynamic> get(
+    String path, {
+    Map<String, dynamic>? query,
+    bool auth = true,
+  }) async {
+    return _send(
+      () async =>
+          http.get(_uri(path, query), headers: await _headers(auth: auth)),
     );
   }
 
-  Future<dynamic> get(String path, {Map<String, dynamic>? query, bool auth = true}) async {
-    return _send(() async => http.get(_uri(path, query), headers: await _headers(auth: auth)));
+  Future<dynamic> post(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = true,
+  }) async {
+    return _send(
+      () async => http.post(
+        _uri(path),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body ?? {}),
+      ),
+    );
   }
 
-  Future<dynamic> post(String path, {Map<String, dynamic>? body, bool auth = true}) async {
-    return _send(() async => http.post(_uri(path), headers: await _headers(auth: auth), body: jsonEncode(body ?? {})));
+  Future<dynamic> patch(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = true,
+  }) async {
+    return _send(
+      () async => http.patch(
+        _uri(path),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body ?? {}),
+      ),
+    );
   }
 
-  Future<dynamic> patch(String path, {Map<String, dynamic>? body, bool auth = true}) async {
-    return _send(() async => http.patch(_uri(path), headers: await _headers(auth: auth), body: jsonEncode(body ?? {})));
+  Future<dynamic> put(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = true,
+  }) async {
+    return _send(
+      () async => http.put(
+        _uri(path),
+        headers: await _headers(auth: auth),
+        body: jsonEncode(body ?? {}),
+      ),
+    );
   }
 
   Future<dynamic> _send(Future<http.Response> Function() call) async {
@@ -68,7 +113,10 @@ class ApiClient {
       res = await call().timeout(ApiConfig.timeout);
     } catch (_) {
       // Covers SocketException, TimeoutException, handshake errors, etc.
-      throw ApiException(LocaleController.l.couldNotReachServer(ApiConfig.baseUrl), isConnectivity: true);
+      throw ApiException(
+        LocaleController.l.couldNotReachServer(ApiConfig.baseUrl),
+        isConnectivity: true,
+      );
     }
 
     if (res.statusCode == 401) {
@@ -78,14 +126,21 @@ class ApiClient {
         onUnauthorized?.call();
         _handling401 = false;
       }
-      throw ApiException(LocaleController.l.sessionExpiredMessage, statusCode: 401);
+      throw ApiException(
+        LocaleController.l.sessionExpiredMessage,
+        statusCode: 401,
+      );
     }
     if (res.statusCode < 200 || res.statusCode >= 300) {
       String msg = LocaleController.l.requestFailedWithCode(res.statusCode);
       try {
         final decoded = jsonDecode(res.body);
-        if (decoded is Map && decoded['message'] != null) msg = decoded['message'];
-      } catch (_) {/* ignore parse errors, use default message */}
+        if (decoded is Map && decoded['message'] != null) {
+          msg = decoded['message'];
+        }
+      } catch (_) {
+        /* ignore parse errors, use default message */
+      }
       throw ApiException(msg, statusCode: res.statusCode);
     }
     if (res.body.isEmpty) return null;

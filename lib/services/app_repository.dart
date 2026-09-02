@@ -39,12 +39,15 @@ class AppRepository {
     }
     final role = UserRole.values.firstWhere(
       (r) => r.name == roleStr.toLowerCase(),
-      orElse: () => throw ApiException(LocaleController.l.unrecognizedRoleMessage(roleStr)),
+      orElse: () => throw ApiException(
+        LocaleController.l.unrecognizedRoleMessage(roleStr),
+      ),
     );
     final token = json['token'] as String;
     await Session.saveToken(token, remember: remember);
     await Session.saveRole(role.name, remember: remember);
-    final name = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'.trim();
+    final name = '${user['first_name'] ?? ''} ${user['last_name'] ?? ''}'
+        .trim();
     return AuthResult(
       role: role,
       id: '${user['id'] ?? ''}',
@@ -136,14 +139,18 @@ class AppRepository {
                 code: r['subject_code'] ?? '',
                 className: r['className'] ?? '',
                 icon: iconForSubjectCode(r['subject_code']),
-                color: colorForSeed('${r['subject_code'] ?? r['subject_id'] ?? ''}'),
+                color: colorForSeed(
+                  '${r['subject_code'] ?? r['subject_id'] ?? ''}',
+                ),
               ),
             )
             .toList();
       }
       final json = await _api.get('/teacher/subjects');
       return (json['data'] as List)
-          .map((s) => Subject.fromTeacherSubjectJson(Map<String, dynamic>.from(s)))
+          .map(
+            (s) => Subject.fromTeacherSubjectJson(Map<String, dynamic>.from(s)),
+          )
           .toList();
     }
 
@@ -168,7 +175,10 @@ class AppRepository {
     for (final a in list) {
       if (a.id == id) return a;
     }
-    throw ApiException(LocaleController.l.assessmentNotFoundMessage, statusCode: 404);
+    throw ApiException(
+      LocaleController.l.assessmentNotFoundMessage,
+      statusCode: 404,
+    );
   }
 
   /// Starts (or resumes) the timed attempt server-side and returns the full
@@ -181,7 +191,26 @@ class AppRepository {
   }
 
   Future<List<Assessment>> fetchAssessmentsBySubject(String subjectId) async {
-    final json = await _api.get('/student/quizzes', query: {'subject_id': subjectId});
+    final json = await _api.get(
+      '/student/quizzes',
+      query: {'subject_id': subjectId},
+    );
+    return (json['data'] as List)
+        .map((a) => Assessment.fromJson(Map<String, dynamic>.from(a)))
+        .toList();
+  }
+
+  /// Quizzes for one specific (class, subject) enrollment — used by the
+  /// course workspace, since a student can be enrolled in the same subject
+  /// across more than one class.
+  Future<List<Assessment>> fetchAssessmentsForClass({
+    required String classId,
+    required String subjectId,
+  }) async {
+    final json = await _api.get(
+      '/student/quizzes',
+      query: {'class_id': classId, 'subject_id': subjectId},
+    );
     return (json['data'] as List)
         .map((a) => Assessment.fromJson(Map<String, dynamic>.from(a)))
         .toList();
@@ -234,6 +263,21 @@ class AppRepository {
         .toList();
   }
 
+  /// Past submissions for one specific (class, subject) enrollment — used by
+  /// the course workspace's "Results" section.
+  Future<List<HistoryItem>> fetchHistoryForClass({
+    required String classId,
+    required String subjectId,
+  }) async {
+    final json = await _api.get(
+      '/student/results',
+      query: {'class_id': classId, 'subject_id': subjectId},
+    );
+    return (json['data'] as List)
+        .map((h) => HistoryItem.fromJson(Map<String, dynamic>.from(h)))
+        .toList();
+  }
+
   // ---------------- Notifications ----------------
 
   Future<List<AppNotification>> fetchNotifications() async {
@@ -241,6 +285,18 @@ class AppRepository {
     return (json['data'] as List)
         .map((n) => AppNotification.fromJson(Map<String, dynamic>.from(n)))
         .toList();
+  }
+
+  /// Laravel's `/student/notifications` response also carries an
+  /// `unreadCount` alongside `data` — this is what the home screen's bell
+  /// icon badge reads.
+  Future<int> fetchUnreadNotificationsCount() async {
+    final json = await _api.get('/student/notifications');
+    return (json['unreadCount'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await _api.post('/student/notifications/$id/read');
   }
 
   Future<void> markAllNotificationsRead() async {
@@ -263,40 +319,52 @@ class AppRepository {
 
   Future<Student> fetchProfile() async {
     final json = await _api.get('/me');
-    var student = Student.fromJson(Map<String, dynamic>.from(json));
-    // /me has no faculty/major/academic-year fields — best-effort pull
-    // those from the student's first enrolled course.
-    try {
-      final coursesJson = await _api.get('/student/courses');
-      final courses = (coursesJson['data'] as List);
-      if (courses.isNotEmpty) {
-        final first = Map<String, dynamic>.from(courses.first);
-        student = student.copyWithCourse(
-          major: first['major'],
-          className: first['className'],
-          academicYear: first['academicYear'],
-        );
-      }
-    } catch (_) {
-      // profile is still usable without this enrichment
-    }
-    return student;
+    return Student.fromJson(Map<String, dynamic>.from(json));
   }
 
-  /// Laravel has no dedicated profile-update route documented yet — this
-  /// guesses `PATCH /me` (symmetric with the `GET /me` used by [fetchProfile]).
-  /// If the real route turns out to be named differently, only this method
-  /// needs to change.
+  /// `PUT /me` returns the raw, un-nested `users` row (no `role`/
+  /// `studentProfile` block), which isn't enough on its own to rebuild a
+  /// full [Student] — so this re-fetches [fetchProfile] after saving rather
+  /// than parsing the save response directly.
   Future<Student> updateProfile({
     required String firstName,
     required String lastName,
     required String email,
+    String? nameKh,
+    String? gender,
+    String? dob,
+    String? phone,
+    String? address,
   }) async {
-    final json = await _api.patch(
+    await _api.put(
       '/me',
-      body: {'first_name': firstName, 'last_name': lastName, 'email': email},
+      body: {
+        'first_name': firstName,
+        'last_name': lastName,
+        'email': email,
+        'name_kh': nameKh,
+        'gender': gender,
+        'dob': dob,
+        'phone': phone,
+        'address': address,
+      },
     );
-    return Student.fromJson(Map<String, dynamic>.from(json));
+    return fetchProfile();
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    await _api.put(
+      '/me/password',
+      body: {
+        'current_password': currentPassword,
+        'password': newPassword,
+        'password_confirmation': newPasswordConfirmation,
+      },
+    );
   }
 
   /// No `/profile/preferences` route exists in Laravel — kept local-only.
@@ -316,17 +384,19 @@ class AppRepository {
     return Teacher.fromJson(Map<String, dynamic>.from(json));
   }
 
-  /// See [updateProfile] — same caveat about the guessed `PATCH /me` route.
+  /// `PUT /me` returns the raw `users` row wrapped as `{message, user}`, not
+  /// the flat shape [Teacher.fromJson] expects — so this re-fetches
+  /// [fetchTeacherProfile] after saving rather than parsing the response.
   Future<Teacher> updateTeacherProfile({
     required String firstName,
     required String lastName,
     required String email,
   }) async {
-    final json = await _api.patch(
+    await _api.put(
       '/me',
       body: {'first_name': firstName, 'last_name': lastName, 'email': email},
     );
-    return Teacher.fromJson(Map<String, dynamic>.from(json));
+    return fetchTeacherProfile();
   }
 
   /// No aggregate "/teacher/results" route exists — this merges
@@ -346,8 +416,11 @@ class AppRepository {
       final quizId = '${quiz['id']}';
       final scoresJson = await _api.get('/teacher/quizzes/$quizId/scores');
       final quizTotalPoints =
-          (scoresJson['totalPoints'] as num?)?.toInt() ?? (quiz['totalPoints'] ?? 0);
-      final rows = (scoresJson['data'] as List).map((r) => Map<String, dynamic>.from(r));
+          (scoresJson['totalPoints'] as num?)?.toInt() ??
+          (quiz['totalPoints'] ?? 0);
+      final rows = (scoresJson['data'] as List).map(
+        (r) => Map<String, dynamic>.from(r),
+      );
       for (final r in rows) {
         results.add(
           TeacherResult(

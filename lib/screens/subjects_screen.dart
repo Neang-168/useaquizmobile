@@ -8,15 +8,11 @@ import '../l10n/generated/app_localizations.dart';
 import 'subject_quizzes_screen.dart';
 
 class SubjectsScreen extends StatefulWidget {
-  final bool embedded;
-  final bool jumpToAssessments;
   final String? classRoomId;
   final String? classRoomName;
   final void Function(Subject)? onSubjectTap;
   const SubjectsScreen({
     super.key,
-    this.embedded = false,
-    this.jumpToAssessments = false,
     this.classRoomId,
     this.classRoomName,
     this.onSubjectTap,
@@ -54,8 +50,10 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   }
 
   void _retry() => setState(() {
-        _future = AppRepository.instance.fetchSubjects(classRoomId: widget.classRoomId);
-      });
+    _future = AppRepository.instance.fetchSubjects(
+      classRoomId: widget.classRoomId,
+    );
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +74,6 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               SkeletonBox(height: 90, radius: 20),
             ],
           );
-          if (widget.embedded) return loading;
           return Scaffold(
             appBar: AppBar(
               title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),
@@ -86,14 +83,18 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           );
         }
         if (snapshot.hasError) {
-          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
-          if (widget.embedded) return error;
           return Scaffold(
             appBar: AppBar(
               title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),
               leading: const BackButton(),
             ),
-            body: SafeArea(top: false, child: error),
+            body: SafeArea(
+              top: false,
+              child: ErrorStateView(
+                message: describeApiError(snapshot.error!),
+                onRetry: _retry,
+              ),
+            ),
           );
         }
         return _buildBody(context, snapshot.data!);
@@ -103,7 +104,10 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
 
   Widget _buildBody(BuildContext context, List<Subject> subjects) {
     final l = AppLocalizations.of(context);
-    final classNames = subjects.map((s) => s.className).where((c) => c.isNotEmpty).toSet();
+    final classNames = subjects
+        .map((s) => s.className)
+        .where((c) => c.isNotEmpty)
+        .toSet();
     final filtered = subjects.where((s) {
       final matchesQuery = s.name.toLowerCase().contains(_query.toLowerCase());
       final matchesClass = _classFilter == null || s.className == _classFilter;
@@ -115,8 +119,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
         Text(
-          widget.classRoomName ??
-              (widget.jumpToAssessments ? l.assessmentsTitle : l.mySubjects),
+          widget.classRoomName ?? l.mySubjects,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 4),
@@ -246,7 +249,6 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       child: body,
     );
 
-    if (widget.embedded) return refreshableBody;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.classRoomName ?? l.subjectsAppBarTitle),

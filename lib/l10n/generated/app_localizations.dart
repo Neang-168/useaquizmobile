@@ -119,13 +119,13 @@ abstract class AppLocalizations {
   /// No description provided for @navSubjects.
   ///
   /// In en, this message translates to:
-  /// **'Subjects'**
+  /// **'My Course'**
   String get navSubjects;
 
   /// No description provided for @navAssessments.
   ///
   /// In en, this message translates to:
-  /// **'Assessments'**
+  /// **'Quiz'**
   String get navAssessments;
 
   /// No description provided for @navHistory.
@@ -494,6 +494,144 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get statusLabel;
 
+  /// No description provided for @roleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get roleLabel;
+
+  /// No description provided for @joinedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get joinedLabel;
+
+  /// No description provided for @genderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get genderLabel;
+
+  /// No description provided for @dobLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dobLabel;
+
+  /// No description provided for @addressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get addressLabel;
+
+  /// No description provided for @khmerNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Khmer Name'**
+  String get khmerNameLabel;
+
+  /// No description provided for @facultyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Faculty'**
+  String get facultyLabel;
+
+  /// No description provided for @degreeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Degree'**
+  String get degreeLabel;
+
+  /// No description provided for @departmentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Department'**
+  String get departmentLabel;
+
+  /// No description provided for @semesterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Semester'**
+  String get semesterLabel;
+
+  /// No description provided for @termLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Term'**
+  String get termLabel;
+
+  /// No description provided for @shiftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get shiftLabel;
+
+  /// No description provided for @stageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stage'**
+  String get stageLabel;
+
+  /// No description provided for @promotionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion'**
+  String get promotionLabel;
+
+  /// No description provided for @studentCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Student Code'**
+  String get studentCodeLabel;
+
+  /// No description provided for @admissionDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admission Date'**
+  String get admissionDateLabel;
+
+  /// No description provided for @enrollmentDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Date'**
+  String get enrollmentDateLabel;
+
+  /// No description provided for @enrollmentStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment Status'**
+  String get enrollmentStatusLabel;
+
+  /// No description provided for @inactiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactiveLabel;
+
+  /// No description provided for @personalInformationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformationTitle;
+
+  /// No description provided for @academicInformationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic Information'**
+  String get academicInformationTitle;
+
+  /// No description provided for @noEnrollmentRecordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Enrollment Record'**
+  String get noEnrollmentRecordTitle;
+
+  /// No description provided for @noEnrollmentRecordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No enrollment record found yet. Contact your administrator if this looks wrong.'**
+  String get noEnrollmentRecordSubtitle;
+
   /// No description provided for @welcomeBack.
   ///
   /// In en, this message translates to:
@@ -601,6 +739,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} subjects enrolled'**
   String subjectsEnrolledCount(Object count);
+
+  /// No description provided for @myClassesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Classes'**
+  String get myClassesTitle;
+
+  /// No description provided for @notEnrolledInAnyClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not enrolled in any classes yet.'**
+  String get notEnrolledInAnyClasses;
+
+  /// No description provided for @activeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeLabel;
+
+  /// No description provided for @subjectCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject Code'**
+  String get subjectCodeLabel;
+
+  /// No description provided for @classGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class Group'**
+  String get classGroupLabel;
+
+  /// No description provided for @quizzesCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes Completed'**
+  String get quizzesCompletedLabel;
+
+  /// No description provided for @openWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Workspace'**
+  String get openWorkspace;
+
+  /// No description provided for @newlyPublishedQuizzes.
+  ///
+  /// In en, this message translates to:
+  /// **'Newly Published Quizzes'**
+  String get newlyPublishedQuizzes;
+
+  /// No description provided for @newBadgeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get newBadgeLabel;
+
+  /// No description provided for @opensOnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {date}'**
+  String opensOnLabel(Object date);
+
+  /// No description provided for @closedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get closedLabel;
+
+  /// No description provided for @noAttemptsLeftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No Attempts Left'**
+  String get noAttemptsLeftLabel;
+
+  /// No description provided for @startExamLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Exam'**
+  String get startExamLabel;
 
   /// No description provided for @completedAssessments.
   ///
@@ -1184,6 +1400,12 @@ abstract class AppLocalizations {
   /// **'You\'re all caught up!'**
   String get noNotificationsSubtitle;
 
+  /// No description provided for @closeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeAction;
+
   /// No description provided for @editProfileTitle.
   ///
   /// In en, this message translates to:
@@ -1273,6 +1495,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t save changes: {error}'**
   String couldntSaveChanges(Object error);
+
+  /// No description provided for @khmerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. សុខ វិសាល'**
+  String get khmerNameHint;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'012 345 678'**
+  String get phoneHint;
+
+  /// No description provided for @addressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Street, city, country'**
+  String get addressHint;
+
+  /// No description provided for @genderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get genderMale;
+
+  /// No description provided for @genderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get genderFemale;
+
+  /// No description provided for @selectGenderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select gender'**
+  String get selectGenderHint;
+
+  /// No description provided for @selectDobHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date of birth'**
+  String get selectDobHint;
+
+  /// No description provided for @changePasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordLabel;
+
+  /// No description provided for @changePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your account security'**
+  String get changePasswordSubtitle;
+
+  /// No description provided for @currentPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPasswordLabel;
+
+  /// No description provided for @currentPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get currentPasswordHint;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @newPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum 8 characters'**
+  String get newPasswordHint;
+
+  /// No description provided for @confirmNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPasswordLabel;
+
+  /// No description provided for @confirmNewPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat new password'**
+  String get confirmNewPasswordHint;
+
+  /// No description provided for @updatePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePasswordButton;
+
+  /// No description provided for @missingPasswordFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in all password fields.'**
+  String get missingPasswordFields;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be at least 8 characters.'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'New password and confirmation must match.'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordChangedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password was updated.'**
+  String get passwordChangedMessage;
+
+  /// No description provided for @couldntChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change password: {error}'**
+  String couldntChangePassword(Object error);
 
   /// No description provided for @perQuestionUnavailable.
   ///
@@ -1573,6 +1921,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{{count} subject} other{{count} subjects}}'**
   String subjectCount(num count);
+
+  /// No description provided for @myCourseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Course'**
+  String get myCourseTitle;
+
+  /// No description provided for @myCourseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse your enrolled classes and open a workspace to see quizzes and results'**
+  String get myCourseSubtitle;
+
+  /// No description provided for @courseCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{filtered} of {total} subjects'**
+  String courseCountLabel(Object filtered, Object total);
+
+  /// No description provided for @filterClassLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get filterClassLabel;
+
+  /// No description provided for @filterSubjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get filterSubjectLabel;
+
+  /// No description provided for @filterShiftLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get filterShiftLabel;
+
+  /// No description provided for @allClassesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Classes'**
+  String get allClassesFilter;
+
+  /// No description provided for @allSubjectsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Subjects'**
+  String get allSubjectsFilter;
+
+  /// No description provided for @allShiftsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Shifts'**
+  String get allShiftsFilter;
+
+  /// No description provided for @allAcademicYearsFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All Years'**
+  String get allAcademicYearsFilter;
+
+  /// No description provided for @searchCoursesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject, class...'**
+  String get searchCoursesHint;
+
+  /// No description provided for @noEnrolledCoursesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Enrolled Courses Found'**
+  String get noEnrolledCoursesTitle;
+
+  /// No description provided for @noEnrolledCoursesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not enrolled in any subjects for this semester yet.'**
+  String get noEnrolledCoursesSubtitle;
+
+  /// No description provided for @noCoursesMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No courses match your filters.'**
+  String get noCoursesMatchFilters;
+
+  /// No description provided for @totalQuizzesBoxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Quizzes'**
+  String get totalQuizzesBoxLabel;
+
+  /// No description provided for @percentCompleteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete'**
+  String percentCompleteLabel(Object percent);
+
+  /// No description provided for @viewQuizzesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Quizzes'**
+  String get viewQuizzesAction;
+
+  /// No description provided for @teacherPrefixLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher: {name}'**
+  String teacherPrefixLabel(Object name);
+
+  /// No description provided for @quizzesTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quizzes'**
+  String get quizzesTabLabel;
+
+  /// No description provided for @resultsTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get resultsTabLabel;
+
+  /// No description provided for @openNowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Now'**
+  String get openNowLabel;
+
+  /// No description provided for @upcomingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcomingLabel;
+
+  /// No description provided for @noOpenQuizzesForCourse.
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes are open for this course right now.'**
+  String get noOpenQuizzesForCourse;
+
+  /// No description provided for @lastSubmittedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last submitted {date}'**
+  String lastSubmittedLabel(Object date);
+
+  /// No description provided for @attemptsCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 attempt} other{{count} attempts}}'**
+  String attemptsCountLabel(num count);
+
+  /// No description provided for @scoreOfTotalPercentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{score} / {total} ({percent}%)'**
+  String scoreOfTotalPercentLabel(Object score, Object total, Object percent);
+
+  /// No description provided for @quizzesScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get quizzesScreenTitle;
+
+  /// No description provided for @quizzesScreenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All your quizzes across every class'**
+  String get quizzesScreenSubtitle;
+
+  /// No description provided for @searchQuizzesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search quiz title...'**
+  String get searchQuizzesHint;
+
+  /// No description provided for @noQuizzesMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No quizzes match your filters.'**
+  String get noQuizzesMatchFilters;
 
   /// No description provided for @genericErrorMessage.
   ///

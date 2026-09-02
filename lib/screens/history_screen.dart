@@ -16,9 +16,9 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   String _query = '';
-  // null means "All" — kept locale-independent since PerformanceLevel.label
-  // is a translated display string, not a stable identifier to filter by.
-  PerformanceLevel? _filter;
+  // null means "All" for both.
+  String? _subjectFilter;
+  bool? _passedFilter;
   late Future<List<HistoryItem>> _future;
 
   @override
@@ -27,7 +27,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _future = AppRepository.instance.fetchHistory();
   }
 
-  void _retry() => setState(() => _future = AppRepository.instance.fetchHistory());
+  void _retry() =>
+      setState(() => _future = AppRepository.instance.fetchHistory());
 
   @override
   Widget build(BuildContext context) {
@@ -47,15 +48,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
           );
           if (widget.embedded) return loading;
           return Scaffold(
-            appBar: AppBar(title: Text(AppLocalizations.of(context).historyAppBarTitle), leading: const BackButton()),
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context).historyAppBarTitle),
+              leading: const BackButton(),
+            ),
             body: SafeArea(top: false, child: loading),
           );
         }
         if (snapshot.hasError) {
-          final error = ErrorStateView(message: describeApiError(snapshot.error!), onRetry: _retry);
+          final error = ErrorStateView(
+            message: describeApiError(snapshot.error!),
+            onRetry: _retry,
+          );
           if (widget.embedded) return error;
           return Scaffold(
-            appBar: AppBar(title: Text(AppLocalizations.of(context).historyAppBarTitle), leading: const BackButton()),
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context).historyAppBarTitle),
+              leading: const BackButton(),
+            ),
             body: SafeArea(top: false, child: error),
           );
         }
@@ -66,19 +76,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildBody(BuildContext context, List<HistoryItem> history) {
     final l = AppLocalizations.of(context);
+    final subjectOptions =
+        history
+            .map((h) => h.subject)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
     final filtered = history.where((h) {
       final q = _query.toLowerCase();
-      final matchesQuery = h.subject.toLowerCase().contains(q) || h.quizTitle.toLowerCase().contains(q);
-      final matchesFilter = _filter == null || h.level == _filter;
-      return matchesQuery && matchesFilter;
+      final matchesQuery =
+          h.subject.toLowerCase().contains(q) ||
+          h.quizTitle.toLowerCase().contains(q);
+      final matchesSubject =
+          _subjectFilter == null || h.subject == _subjectFilter;
+      final matchesStatus = _passedFilter == null || h.passed == _passedFilter;
+      return matchesQuery && matchesSubject && matchesStatus;
     }).toList();
 
     final body = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        Text(l.assessmentHistoryTitle, style: Theme.of(context).textTheme.headlineMedium),
+        Text(
+          l.assessmentHistoryTitle,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
         const SizedBox(height: 4),
-        Text(l.trackHistorySubtitle, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          l.trackHistorySubtitle,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         const SizedBox(height: 14),
         TextField(
           onChanged: (v) => setState(() => _query = v),
@@ -87,25 +114,41 @@ class _HistoryScreenState extends State<HistoryScreen> {
             prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
+        FilterDropdown(
+          label: l.filterSubjectLabel,
+          value: _subjectFilter,
+          options: subjectOptions,
+          allLabel: l.allSubjectsFilter,
+          onChanged: (v) => setState(() => _subjectFilter = v),
+        ),
+        const SizedBox(height: 12),
         SizedBox(
           height: 36,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            children: [null, ...PerformanceLevel.values].map((f) {
-              final selected = _filter == f;
+            children: [null, true, false].map((f) {
+              final selected = _passedFilter == f;
+              final label = f == null
+                  ? l.allFilter
+                  : (f ? l.passed : l.notPassed);
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(f?.label ?? l.allFilter),
+                  label: Text(label),
                   selected: selected,
-                  onSelected: (_) => setState(() => _filter = f),
+                  onSelected: (_) => setState(() => _passedFilter = f),
                   selectedColor: AppColors.primary,
                   backgroundColor: AppColors.surface,
                   labelStyle: TextStyle(
-                      color: selected ? Colors.white : AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 12.5),
+                    color: selected ? Colors.white : AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.pill), side: BorderSide(color: AppColors.border)),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    side: BorderSide(color: AppColors.border),
+                  ),
                 ),
               );
             }).toList(),
@@ -119,49 +162,81 @@ class _HistoryScreenState extends State<HistoryScreen> {
             subtitle: l.noHistoryFoundSubtitle,
           )
         else
-          ...filtered.map((h) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: softCardDecoration(),
-                  child: Row(
-                    children: [
-                      IconBadge(icon: Icons.description_rounded, color: h.color, size: 48),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(h.quizTitle.isNotEmpty ? h.quizTitle : h.subject, style: Theme.of(context).textTheme.titleMedium),
-                            const SizedBox(height: 2),
-                            Text(h.subject, style: Theme.of(context).textTheme.bodyMedium),
-                            const SizedBox(height: 4),
-                            Row(children: [
-                              Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
-                              const SizedBox(width: 4),
-                              Text(formatDisplayDate(h.submittedAt), style: Theme.of(context).textTheme.bodyMedium),
-                            ]),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+          ...filtered.map(
+            (h) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: softCardDecoration(),
+                child: Row(
+                  children: [
+                    IconBadge(
+                      icon: Icons.description_rounded,
+                      color: h.color,
+                      size: 48,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${h.percentage.round()}%', style: Theme.of(context).textTheme.titleLarge),
+                          Text(
+                            h.quizTitle.isNotEmpty ? h.quizTitle : h.subject,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            h.subject,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                           const SizedBox(height: 4),
-                          StatusPill(label: h.level.label, color: h.color),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 12,
+                                color: AppColors.textMuted,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                formatDisplayDate(h.submittedAt),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${h.percentage.round()}%',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        StatusPill(
+                          label: h.passed ? l.passed : l.notPassed,
+                          color: h.passed
+                              ? AppColors.success
+                              : AppColors.danger,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
       ],
     );
 
     if (widget.embedded) return body;
     return Scaffold(
-      appBar: AppBar(title: Text(l.historyAppBarTitle), leading: const BackButton()),
+      appBar: AppBar(
+        title: Text(l.historyAppBarTitle),
+        leading: const BackButton(),
+      ),
       body: SafeArea(top: false, child: body),
     );
   }
