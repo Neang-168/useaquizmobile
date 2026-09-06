@@ -15,6 +15,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  final _searchController = TextEditingController();
   String _query = '';
   // null means "All" for both.
   String? _subjectFilter;
@@ -25,6 +26,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     _future = AppRepository.instance.fetchHistory();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _retry() =>
@@ -101,59 +108,182 @@ class _HistoryScreenState extends State<HistoryScreen> {
           l.assessmentHistoryTitle,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        const SizedBox(height: 4),
-        Text(
-          l.trackHistorySubtitle,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 14),
-        TextField(
-          onChanged: (v) => setState(() => _query = v),
-          decoration: InputDecoration(
-            hintText: l.searchBySubjectHint,
-            prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted),
-          ),
-        ),
-        const SizedBox(height: 12),
-        FilterDropdown(
-          label: l.filterSubjectLabel,
-          value: _subjectFilter,
-          options: subjectOptions,
-          allLabel: l.allSubjectsFilter,
-          onChanged: (v) => setState(() => _subjectFilter = v),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 36,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [null, true, false].map((f) {
-              final selected = _passedFilter == f;
-              final label = f == null
-                  ? l.allFilter
-                  : (f ? l.passed : l.notPassed);
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(label),
-                  selected: selected,
-                  onSelected: (_) => setState(() => _passedFilter = f),
-                  selectedColor: AppColors.primary,
-                  backgroundColor: AppColors.surface,
-                  labelStyle: TextStyle(
-                    color: selected ? Colors.white : AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12.5,
+        const SizedBox(height: 8),
+        if (history.isEmpty)
+          Text(
+            l.trackHistorySubtitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
+        else
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.fact_check_rounded,
+                    size: 13,
+                    color: AppColors.primary,
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    side: BorderSide(color: AppColors.border),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${filtered.length} ${l.resultsLabel}',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        const SizedBox(height: 16),
+
+        if (history.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _query = v),
+                  decoration: InputDecoration(
+                    hintText: l.searchBySubjectHint,
+                    filled: true,
+                    fillColor: AppColors.background,
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                          ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.6,
+                      ),
+                    ),
                   ),
                 ),
-              );
-            }).toList(),
+                const SizedBox(height: 10),
+                FilterDropdown(
+                  label: l.filterSubjectLabel,
+                  value: _subjectFilter,
+                  options: subjectOptions,
+                  allLabel: l.allSubjectsFilter,
+                  icon: Icons.menu_book_rounded,
+                  iconColor: AppColors.primary,
+                  onChanged: (v) => setState(() => _subjectFilter = v),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [null, true, false].map((f) {
+                    final selected = _passedFilter == f;
+                    final label = f == null
+                        ? l.allFilter
+                        : (f ? l.passed : l.notPassed);
+                    final chipIcon = f == null
+                        ? Icons.done_all_rounded
+                        : (f
+                              ? Icons.check_circle_rounded
+                              : Icons.highlight_off_rounded);
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: f == false ? 0 : 8),
+                        child: ChoiceChip(
+                          label: Text(
+                            label,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          avatar: Icon(
+                            chipIcon,
+                            size: 14,
+                            color: selected
+                                ? Colors.white
+                                : AppColors.textMuted,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          selected: selected,
+                          onSelected: (_) => setState(() => _passedFilter = f),
+                          selectedColor: AppColors.primary,
+                          backgroundColor: AppColors.background,
+                          labelStyle: TextStyle(
+                            color: selected
+                                ? Colors.white
+                                : AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppRadius.pill,
+                            ),
+                            side: BorderSide(
+                              color: selected
+                                  ? AppColors.primary
+                                  : AppColors.border,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
-        ),
         const SizedBox(height: 18),
         if (filtered.isEmpty)
           EmptyState(

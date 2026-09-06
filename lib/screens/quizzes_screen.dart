@@ -20,6 +20,7 @@ class QuizzesScreen extends StatefulWidget {
 
 class _QuizzesScreenState extends State<QuizzesScreen> {
   late Future<List<Assessment>> _future;
+  final _searchController = TextEditingController();
   String _query = '';
   String? _classFilter;
   String? _subjectFilter;
@@ -28,6 +29,12 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
   void initState() {
     super.initState();
     _future = AppRepository.instance.fetchAllAssessments();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _retry() => setState(() {
@@ -131,38 +138,97 @@ class _QuizzesScreenState extends State<QuizzesScreen> {
         const SizedBox(height: 16),
 
         if (quizzes.isNotEmpty) ...[
-          Row(
-            children: [
-              Expanded(
-                child: FilterDropdown(
-                  label: l.filterClassLabel,
-                  value: _classFilter,
-                  options: classOptions,
-                  allLabel: l.allClassesFilter,
-                  onChanged: (v) => setState(() => _classFilter = v),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilterDropdown(
-                  label: l.filterSubjectLabel,
-                  value: _subjectFilter,
-                  options: subjectOptions,
-                  allLabel: l.allSubjectsFilter,
-                  onChanged: (v) => setState(() => _subjectFilter = v),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.filterClassLabel,
+                        value: _classFilter,
+                        options: classOptions,
+                        allLabel: l.allClassesFilter,
+                        icon: Icons.groups_rounded,
+                        iconColor: AppColors.accent,
+                        onChanged: (v) => setState(() => _classFilter = v),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.filterSubjectLabel,
+                        value: _subjectFilter,
+                        options: subjectOptions,
+                        allLabel: l.allSubjectsFilter,
+                        icon: Icons.menu_book_rounded,
+                        iconColor: AppColors.primary,
+                        onChanged: (v) => setState(() => _subjectFilter = v),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            onChanged: (v) => setState(() => _query = v),
-            decoration: InputDecoration(
-              hintText: l.searchQuizzesHint,
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: AppColors.textMuted,
-              ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _query = v),
+                  decoration: InputDecoration(
+                    hintText: l.searchQuizzesHint,
+                    filled: true,
+                    fillColor: AppColors.background,
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                          ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.6,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 18),

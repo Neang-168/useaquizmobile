@@ -937,6 +937,8 @@ class FilterDropdown extends StatelessWidget {
   final List<String> options;
   final String allLabel;
   final ValueChanged<String?> onChanged;
+  final IconData? icon;
+  final Color? iconColor;
 
   const FilterDropdown({
     super.key,
@@ -945,6 +947,8 @@ class FilterDropdown extends StatelessWidget {
     required this.options,
     required this.allLabel,
     required this.onChanged,
+    this.icon,
+    this.iconColor,
   });
 
   @override
@@ -954,15 +958,33 @@ class FilterDropdown extends StatelessWidget {
     // asserting, since DropdownButtonFormField requires its value to be one
     // of its items.
     final safeValue = value != null && options.contains(value) ? value : null;
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      borderSide: BorderSide(color: AppColors.border),
+    );
     return DropdownButtonFormField<String?>(
       initialValue: safeValue,
       isExpanded: true,
       isDense: true,
       decoration: InputDecoration(
         labelText: label,
+        prefixIcon: icon == null
+            ? null
+            : Icon(icon, size: 16, color: iconColor ?? AppColors.textMuted),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 30,
+          minHeight: 0,
+        ),
+        filled: true,
+        fillColor: AppColors.background,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 10,
+        ),
+        border: fieldBorder,
+        enabledBorder: fieldBorder,
+        focusedBorder: fieldBorder.copyWith(
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
         ),
       ),
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 13.5),

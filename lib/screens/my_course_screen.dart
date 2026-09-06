@@ -22,6 +22,7 @@ class MyCourseScreen extends StatefulWidget {
 
 class _MyCourseScreenState extends State<MyCourseScreen> {
   late Future<List<Subject>> _future;
+  final _searchController = TextEditingController();
   String _query = '';
   String? _classFilter;
   String? _subjectFilter;
@@ -32,6 +33,12 @@ class _MyCourseScreenState extends State<MyCourseScreen> {
   void initState() {
     super.initState();
     _future = AppRepository.instance.fetchSubjects();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _retry() => setState(() {
@@ -136,72 +143,168 @@ class _MyCourseScreenState extends State<MyCourseScreen> {
           l.myCourseTitle,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-        const SizedBox(height: 4),
-        Text(
-          courses.isEmpty
-              ? l.myCourseSubtitle
-              : l.courseCountLabel(filtered.length, courses.length),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        const SizedBox(height: 8),
+        if (courses.isEmpty)
+          Text(
+            l.myCourseSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
+        else
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.menu_book_rounded,
+                    size: 13,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    l.courseCountLabel(filtered.length, courses.length),
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         const SizedBox(height: 16),
 
         if (courses.isNotEmpty) ...[
-          Row(
-            children: [
-              Expanded(
-                child: FilterDropdown(
-                  label: l.filterClassLabel,
-                  value: _classFilter,
-                  options: classOptions,
-                  allLabel: l.allClassesFilter,
-                  onChanged: (v) => setState(() => _classFilter = v),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilterDropdown(
-                  label: l.filterSubjectLabel,
-                  value: _subjectFilter,
-                  options: subjectOptions,
-                  allLabel: l.allSubjectsFilter,
-                  onChanged: (v) => setState(() => _subjectFilter = v),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.filterClassLabel,
+                        value: _classFilter,
+                        options: classOptions,
+                        allLabel: l.allClassesFilter,
+                        icon: Icons.groups_rounded,
+                        iconColor: AppColors.accent,
+                        onChanged: (v) => setState(() => _classFilter = v),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.filterSubjectLabel,
+                        value: _subjectFilter,
+                        options: subjectOptions,
+                        allLabel: l.allSubjectsFilter,
+                        icon: Icons.menu_book_rounded,
+                        iconColor: AppColors.primary,
+                        onChanged: (v) => setState(() => _subjectFilter = v),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilterDropdown(
-                  label: l.filterShiftLabel,
-                  value: _shiftFilter,
-                  options: shiftOptions,
-                  allLabel: l.allShiftsFilter,
-                  onChanged: (v) => setState(() => _shiftFilter = v),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.filterShiftLabel,
+                        value: _shiftFilter,
+                        options: shiftOptions,
+                        allLabel: l.allShiftsFilter,
+                        icon: Icons.schedule_rounded,
+                        iconColor: AppColors.secondary,
+                        onChanged: (v) => setState(() => _shiftFilter = v),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilterDropdown(
+                        label: l.academicYearLabel,
+                        value: _academicYearFilter,
+                        options: academicYearOptions,
+                        allLabel: l.allAcademicYearsFilter,
+                        icon: Icons.calendar_month_rounded,
+                        iconColor: AppColors.info,
+                        onChanged: (v) =>
+                            setState(() => _academicYearFilter = v),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilterDropdown(
-                  label: l.academicYearLabel,
-                  value: _academicYearFilter,
-                  options: academicYearOptions,
-                  allLabel: l.allAcademicYearsFilter,
-                  onChanged: (v) => setState(() => _academicYearFilter = v),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _query = v),
+                  decoration: InputDecoration(
+                    hintText: l.searchCoursesHint,
+                    filled: true,
+                    fillColor: AppColors.background,
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                          ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.6,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            onChanged: (v) => setState(() => _query = v),
-            decoration: InputDecoration(
-              hintText: l.searchCoursesHint,
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: AppColors.textMuted,
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 18),
